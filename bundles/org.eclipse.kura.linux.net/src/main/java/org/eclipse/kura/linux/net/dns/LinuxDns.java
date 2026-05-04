@@ -239,7 +239,7 @@ public class LinuxDns {
         if (!status.getExitStatus().isSuccessful()) {
             logger.error("failed to create symbolic link: {} -> {}", dnsFileName, sPppDnsFileName);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                    "failed to create symbolic link to " + sPppDnsFileName);
+                    "failed to create symbolic link to " + sPppDnsFileName, status.getExitStatus().getExitCode());
         } else {
             logger.info("DNS is set to use ppp resolv.conf");
         }

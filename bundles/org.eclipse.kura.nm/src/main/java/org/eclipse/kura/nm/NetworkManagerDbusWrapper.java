@@ -28,7 +28,6 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
@@ -192,7 +191,44 @@ public class NetworkManagerDbusWrapper {
                 String availableConnectionId = (String) availableConnectionSettings.get(NM_SETTING_CONNECTION_KEY)
                         .get("id").getValue();
 
-                if (availableConnectionId.equals(expectedConnectionName)) {
+                if (availableConnectionId.equals(expectedConnectionName)
+                        || availableConnectionId.equals(interfaceName)) {
+                    connections.add(availableConnection);
+                }
+
+            }
+
+        } catch (DBusExecutionException e) {
+            logger.debug("Could not find applied connection for {}, caused by", dev.getObjectPath(), e);
+        }
+
+        return connections;
+    }
+
+    protected List<Connection> getHousekeepingConnections(Device dev) throws DBusException {
+        List<Connection> connections = new ArrayList<>();
+
+        try {
+            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+
+            List<DBusPath> connectionPath = settings.ListConnections();
+
+            Properties deviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, dev.getObjectPath(),
+                    Properties.class);
+            String interfaceName = deviceProperties.Get(NM_DEVICE_BUS_NAME, NM_DEVICE_PROPERTY_INTERFACE);
+            String expectedConnectionName = String.format("kura-%s-connection", interfaceName);
+
+            for (DBusPath path : connectionPath) {
+
+                Connection availableConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, path.getPath(),
+                        Connection.class);
+
+                Map<String, Map<String, Variant<?>>> availableConnectionSettings = availableConnection.GetSettings();
+                String availableConnectionId = (String) availableConnectionSettings.get(NM_SETTING_CONNECTION_KEY)
+                        .get("id").getValue();
+
+                if (availableConnectionId.equals(expectedConnectionName) || availableConnectionId.equals(interfaceName)
+                        || availableConnectionId.equals("Ifupdown (" + interfaceName + ")")) {
                     connections.add(availableConnection);
                 }
 
@@ -208,17 +244,6 @@ public class NetworkManagerDbusWrapper {
     protected void activateConnection(Connection connection, Device device) {
         this.networkManager.ActivateConnection(new DBusPath(connection.getObjectPath()),
                 new DBusPath(device.getObjectPath()), new DBusPath("/"));
-    }
-
-    protected boolean reapplySettings(Device device, Map<String, Map<String, Variant<?>>> settings) {
-        try {
-            device.Reapply(settings, new UInt64(0), new UInt32(0));
-            return true;
-        } catch (DBusExecutionException e) {
-            logger.info("Could not reapply settings to device {}", device.getObjectPath());
-            logger.debug("Caused by", e);
-        }
-        return false;
     }
 
     protected List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {

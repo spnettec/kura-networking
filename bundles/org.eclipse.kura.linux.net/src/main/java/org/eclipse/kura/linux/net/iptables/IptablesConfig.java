@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -235,14 +235,28 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     private void internalFlush(String chain, String table) {
-        CommandStatus status;
-        if (this.executorService != null) {
-            status = execute(getIptablesCommand() + " -F " + chain + " -t " + table);
-            if (!status.getExitStatus().isSuccessful()) {
-                logger.error("Failed to flush rules");
-                logger.debug("Affected chain {} in table {}", chain, table);
-            }
+        if (this.executorService == null) {
+            return;
         }
+        if (!chainExists(chain, table)) {
+            // cold start: kura-prefixed chains don't exist yet — restore() will create them.
+            logger.debug("Skipping flush of chain {} in table {}: chain does not exist", chain, table);
+            return;
+        }
+        CommandStatus status = execute(getIptablesCommand() + " -F " + chain + " -t " + table);
+        if (!status.getExitStatus().isSuccessful()) {
+            logger.error("Failed to flush rules from chain {} in table {}", chain, table);
+        }
+    }
+
+    private boolean chainExists(String chain, String table) {
+        Command command = new Command((getIptablesCommand() + " -nL " + chain + " -t " + table).split(" "));
+        command.setExecuteInAShell(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        command.setOutputStream(out);
+        command.setErrorStream(err);
+        return this.executorService.execute(command).getExitStatus().isSuccessful();
     }
 
     /*
@@ -440,7 +454,6 @@ public class IptablesConfig extends IptablesConfigConstants {
             CommandStatus status = execute((getIptablesCommand() + " " + filterForwardChainRule));
             if (!status.getExitStatus().isSuccessful()) {
                 logger.error("Failed to apply forward rules to filter table");
-                logger.debug("NAT rule: {}", filterForwardChainRule);
             }
         } else {
             writer.println(filterForwardChainRule);
@@ -454,7 +467,6 @@ public class IptablesConfig extends IptablesConfigConstants {
                     CommandStatus status = execute((getIptablesCommand() + " " + lr));
                     if (!status.getExitStatus().isSuccessful()) {
                         logger.error("Failed to apply local rules to filter table");
-                        logger.debug("Local rule: {}", lr);
                     }
                 } else {
                     writer.println(lr);
@@ -480,7 +492,6 @@ public class IptablesConfig extends IptablesConfigConstants {
             CommandStatus status = execute((getIptablesCommand() + " " + filterForwardChainRule));
             if (!status.getExitStatus().isSuccessful()) {
                 logger.error("Failed to apply auto nat rules");
-                logger.debug("Auto nat rule: {}", filterForwardChainRule);
             }
         } else {
             writer.println(filterForwardChainRule);
@@ -504,7 +515,6 @@ public class IptablesConfig extends IptablesConfigConstants {
             CommandStatus status = execute((getIptablesCommand() + " " + filterForwardChainRule));
             if (!status.getExitStatus().isSuccessful()) {
                 logger.error("Failed to apply forward rules");
-                logger.debug("Filter forward chain rule: {}", filterForwardChainRule);
             }
         } else {
             writer.println(filterForwardChainRule);
@@ -517,7 +527,6 @@ public class IptablesConfig extends IptablesConfigConstants {
                 CommandStatus status = execute((getIptablesCommand() + " -t " + FILTER + " " + filterRule));
                 if (!status.getExitStatus().isSuccessful()) {
                     logger.error("Failed to apply additional rules to filter table");
-                    logger.debug("Filter rule: {}", filterRule);
                 }
             } else {
                 writer.println(filterRule);
@@ -570,7 +579,6 @@ public class IptablesConfig extends IptablesConfigConstants {
                     (getIptablesCommand() + " -t " + NAT + " " + autoNatRule.getNatPostroutingChainRule()));
             if (!status.getExitStatus().isSuccessful()) {
                 logger.error("Failed to apply postrouting rules to nat table");
-                logger.debug("Auto nat rule: {}", autoNatRule);
             }
         } else {
             writer.println(autoNatRule.getNatPostroutingChainRule());
@@ -587,7 +595,6 @@ public class IptablesConfig extends IptablesConfigConstants {
                             (getIptablesCommand() + " -t " + NAT + " " + portForwardRule.getNatPostroutingChainRule()));
                     if (!statusPre.getExitStatus().isSuccessful() || !statusPost.getExitStatus().isSuccessful()) {
                         logger.error("Failed to apply pre/postrouting rules to nat table");
-                        logger.debug("Port forward rule: {}", portForwardRule);
                     }
                 } else {
                     writer.println(portForwardRule.getNatPreroutingChainRule());
@@ -603,7 +610,6 @@ public class IptablesConfig extends IptablesConfigConstants {
                 CommandStatus status = execute((getIptablesCommand() + " -t " + NAT + " " + natRule));
                 if (!status.getExitStatus().isSuccessful()) {
                     logger.error("Failed to apply additional rules to nat table");
-                    logger.debug("NAT rule: {}", natRule);
                 }
             } else {
                 writer.println(natRule);
@@ -625,8 +631,7 @@ public class IptablesConfig extends IptablesConfigConstants {
             if (writer == null) {
                 CommandStatus status = execute((getIptablesCommand() + " -t " + MANGLE + " " + mangleRule));
                 if (!status.getExitStatus().isSuccessful()) {
-                    logger.error("Failed to apply prerouting rule to mangle table");
-                    logger.debug("Mangle rule: {}", mangleRule);
+                    logger.error("Failed to apply prerouting rules to mangle table");
                 }
             } else {
                 writer.println(mangleRule);
@@ -1091,7 +1096,6 @@ public class IptablesConfig extends IptablesConfigConstants {
                 (getIptablesCommand() + " " + IptablesConfigConstants.ALLOW_ALL_TRAFFIC_TO_LOOPBACK + " -t " + FILTER))
                 .getExitStatus().isSuccessful()) {
             logger.error("Failed to apply rules to loopback interface");
-            logger.debug("Loopback rule: {}", IptablesConfigConstants.ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
         }
     }
 
@@ -1099,7 +1103,6 @@ public class IptablesConfig extends IptablesConfigConstants {
         if (!execute((getIptablesCommand() + " " + IptablesConfigConstants.ALLOW_ONLY_INCOMING_TO_OUTGOING + " -t "
                 + FILTER)).getExitStatus().isSuccessful()) {
             logger.error("Failed to apply incoming/outcoming rules");
-            logger.debug("Incoming to outcoming rule: {}", IptablesConfigConstants.ALLOW_ONLY_INCOMING_TO_OUTGOING);
         }
     }
 
@@ -1108,16 +1111,14 @@ public class IptablesConfig extends IptablesConfigConstants {
             for (String allowIcmpRule : getAllowIcmp()) {
                 if (!execute((getIptablesCommand() + " " + allowIcmpRule + " -t " + FILTER)).getExitStatus()
                         .isSuccessful()) {
-                    logger.error("Failed to apply ICMP rule");
-                    logger.debug("ICMP rule: {}", allowIcmpRule);
+                    logger.error("Failed to apply {} rule", allowIcmpRule);
                 }
             }
         } else {
             for (String doNotAllowIcmpRule : getNotAllowIcmp()) {
                 if (!execute((getIptablesCommand() + " " + doNotAllowIcmpRule + " -t " + FILTER)).getExitStatus()
                         .isSuccessful()) {
-                    logger.error("Failed to apply ICMP rule");
-                    logger.debug("ICMP rule: {}", doNotAllowIcmpRule);
+                    logger.error("Failed to apply {} rule", doNotAllowIcmpRule);
                 }
             }
         }

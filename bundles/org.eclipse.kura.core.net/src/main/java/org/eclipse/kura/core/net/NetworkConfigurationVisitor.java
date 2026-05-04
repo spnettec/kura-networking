@@ -25,7 +25,7 @@ public interface NetworkConfigurationVisitor {
      * method.
      *
      * @param config
-     *            the {@link NetworkConfiguration} used by the visitor
+     *                   the {@link NetworkConfiguration} used by the visitor
      * @throws KuraException
      */
     public void visit(NetworkConfiguration config) throws KuraException;
@@ -35,7 +35,7 @@ public interface NetworkConfigurationVisitor {
      * {@link NetworkConfigurationVisitor#visit} method.
      *
      * @param executorService
-     *            the {@link CommandExecutorService} used to perform operations on the system
+     *                            the {@link CommandExecutorService} used to perform operations on the system
      */
     public void setExecutorService(CommandExecutorService executorService);
 }

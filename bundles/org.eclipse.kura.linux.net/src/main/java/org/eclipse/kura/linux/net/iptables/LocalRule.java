@@ -75,6 +75,8 @@ public class LocalRule {
         if (permittedNetwork != null) {
             this.permittedNetworkString = Optional
                     .of(permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix());
+        } else {
+            this.permittedNetworkString = Optional.of("0.0.0.0/0");
         }
         if (permittedInterfaceName != null && !permittedInterfaceName.trim().isEmpty()) {
             this.permittedInterfaceName = Optional.of(permittedInterfaceName);
@@ -126,6 +128,8 @@ public class LocalRule {
         if (permittedNetwork != null) {
             this.permittedNetworkString = Optional
                     .of(permittedNetwork.getIpAddress().getHostAddress() + "/" + permittedNetwork.getPrefix());
+        } else {
+            this.permittedNetworkString = Optional.of("0.0.0.0/0");
         }
         if (permittedInterfaceName != null && !permittedInterfaceName.trim().isEmpty()) {
             this.permittedInterfaceName = Optional.of(permittedInterfaceName);
@@ -176,6 +180,9 @@ public class LocalRule {
                 } else if ("--mac-source".equals(aRuleTokens[i])) {
                     this.permittedMAC = Optional.of(aRuleTokens[++i]);
                 }
+            }
+            if (!this.permittedNetworkString.isPresent()) {
+                this.permittedNetworkString = Optional.of("0.0.0.0/0");
             }
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

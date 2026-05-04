@@ -38,12 +38,12 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.configuration.NetworkConfigurationServiceCommon;
+import org.eclipse.kura.net.dns.DnsServerService;
 import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.nm.NetworkProperties;
 import org.eclipse.kura.nm.configuration.event.NetworkConfigurationChangeEvent;
@@ -333,9 +333,11 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
 
                 if (prop instanceof String) {
                     String keystorePid = (String) prop;
+                    if (keystorePid != null && !keystorePid.equals("")) {
 
-                    findAndDecodeCertificatesForInterface(interfaceName, modifiedProps,
-                            this.keystoreServices.get(keystorePid));
+                        findAndDecodeCertificatesForInterface(interfaceName, modifiedProps,
+                                this.keystoreServices.get(keystorePid));
+                    }
                 }
             }
         });

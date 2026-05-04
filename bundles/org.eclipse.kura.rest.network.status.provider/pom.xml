@@ -14,33 +14,38 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.eclipse.kura</groupId>
-        <artifactId>kura-networking.parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>kura</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+        <relativePath>../../../kura/kura/pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../../tests/org.eclipse.kura.rest.network.status.provider.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-    </properties>
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
 
-    <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
-    <packaging>eclipse-plugin</packaging>
+	<artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+	<packaging>eclipse-plugin</packaging>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-compiler-plugin</artifactId>
-                <configuration>
-                    <compilerArgument>-err:-forbidden</compilerArgument>
-                    <useProjectSettings>false</useProjectSettings>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<compilerArgument>-err:-forbidden</compilerArgument>
+					<useProjectSettings>false</useProjectSettings>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

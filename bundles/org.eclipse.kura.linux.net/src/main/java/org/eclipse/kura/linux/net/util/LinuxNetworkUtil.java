@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -658,8 +659,8 @@ public class LinuxNetworkUtil {
                 }
                 return driver;
             }
-            getEthernetDriverParse(driver,
-                    new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+            getEthernetDriverParse(driver, new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                    StandardCharsets.UTF_8));
         }
         return driver;
     }
@@ -710,8 +711,8 @@ public class LinuxNetworkUtil {
                             status.getExitStatus().getExitCode());
                 }
             } else {
-                mode = getWifiModeParseIw(
-                        new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+                mode = getWifiModeParseIw(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                        StandardCharsets.UTF_8));
             }
         }
 
@@ -727,8 +728,8 @@ public class LinuxNetworkUtil {
                         status.getExitStatus().getExitCode());
             }
             // get the output
-            mode = getWifiModeParseIwconfig(
-                    new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+            mode = getWifiModeParseIwconfig(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                    StandardCharsets.UTF_8));
         }
 
         return mode;
@@ -799,8 +800,8 @@ public class LinuxNetworkUtil {
                 }
             } else {
                 // get the output
-                bitRate = getWifiBitrateParseIw(
-                        new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+                bitRate = getWifiBitrateParseIw(new String(
+                        ((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), StandardCharsets.UTF_8));
             }
         } else if (toolExists(IWCONFIG)) {
             // start the process
@@ -816,8 +817,8 @@ public class LinuxNetworkUtil {
             }
 
             // get the output
-            bitRate = getWifiBitrateParseIwconfig(
-                    new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+            bitRate = getWifiBitrateParseIwconfig(new String(
+                    ((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), StandardCharsets.UTF_8));
         }
         return bitRate;
     }
@@ -897,8 +898,8 @@ public class LinuxNetworkUtil {
                 }
             } else {
                 // get the output
-                ssid = getSSIDParseIw(
-                        new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+                ssid = getSSIDParseIw(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                        StandardCharsets.UTF_8));
             }
         } else if (toolExists(IWCONFIG)) {
             // start the process
@@ -914,8 +915,8 @@ public class LinuxNetworkUtil {
             }
 
             // get the output
-            ssid = getSSIDParseIwconfig(
-                    new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+            ssid = getSSIDParseIwconfig(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                    StandardCharsets.UTF_8));
         }
         return ssid;
     }
@@ -994,6 +995,8 @@ public class LinuxNetworkUtil {
             String[] command = new String[] { IFCONFIG, interfaceName, "up" };
             CommandStatus status = executeCommand(command);
             if (!status.getExitStatus().isSuccessful()) {
+                logger.error("error msg:{}", new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(),
+                        StandardCharsets.UTF_8));
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                         "Failed to bring up interface " + interfaceName);
             }
@@ -1004,6 +1007,10 @@ public class LinuxNetworkUtil {
                 command = new String[] { "ifup", interfaceName };
                 status = executeCommand(command);
                 if (!status.getExitStatus().isSuccessful()) {
+                    logger.error("ifup {} errorCode:{},command:{},error msg:{}", interfaceName,
+                            status.getExitStatus().getExitCode(), command,
+                            new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(),
+                                    StandardCharsets.UTF_8));
                     throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                             "Failed to bring up interface " + interfaceName);
                 }

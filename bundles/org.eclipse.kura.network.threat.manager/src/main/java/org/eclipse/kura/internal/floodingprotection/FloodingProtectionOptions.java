@@ -12,9 +12,13 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.floodingprotection;
 
+import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,6 +26,9 @@ import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 
 public class FloodingProtectionOptions {
 
@@ -41,8 +48,7 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
-            "-A prerouting-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
-            "-A prerouting-kura -f -j DROP" };
+            "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
 
     private static final String[] FLOODING_PROTECTION_MANGLE_RULES_IPV6 = {
             "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
@@ -61,6 +67,7 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
             "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 128 -j DROP",
+            "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j DROP",
             "-A prerouting-kura -m ipv6header --header dst --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header hop --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header route --soft -j DROP",
@@ -70,49 +77,6 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -m ipv6header --header none --soft -j DROP",
             "-A prerouting-kura -m rt --rt-type 0 -j DROP", "-A output-kura -m rt --rt-type 0 -j DROP" };
 
-    private static final String[] FLOODING_PROTECTION_FILTER_RULES_IPV6 = {
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 1 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 2 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/0 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/1 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/0 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/1 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/2 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 128 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 144 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 145 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 146 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 147 -j ACCEPT",
-            // Multicast Listener Discovery - essential for IPv6 multicast (mDNS, DHCPv6, etc.)
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 130 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 131 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 132 -j ACCEPT",
-            // Critical Neighbor/Router Discovery - no source restriction for IPv6 connectivity
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 133 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 134 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 135 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 136 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 141 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 142 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 148 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 149 -j ACCEPT",
-            // Multicast Router Discovery - essential for IPv6 routing protocols
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 151 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 152 -j ACCEPT",
-            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 153 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 1 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 2 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/0 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/1 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/0 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/1 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/2 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 144 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 145 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 146 -j ACCEPT",
-            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 147 -j ACCEPT" };
-
     private static final String FRAG_LOW_THR_IPV4_NAME = "/proc/sys/net/ipv4/ipfrag_low_thresh";
     private static final String FRAG_HIGH_THR_IPV4_NAME = "/proc/sys/net/ipv4/ipfrag_high_thresh";
     private static final String FRAG_LOW_THR_IPV6_NAME = "/proc/sys/net/netfilter/nf_conntrack_frag6_low_thresh";
@@ -121,14 +85,8 @@ public class FloodingProtectionOptions {
     private static final int FRAG_HIGH_THR_DEFAULT = 4 * 1024 * 1024;
 
     private static final String PID = "org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator";
-    private static final String FP_DESCRIPTION = "The service enables flooding protection mechanisms via iptables.";
     private static final String FP_ENABLED_PROP_NAME_IPV4 = "flooding.protection.enabled";
-    private static final String FP_ENABLED_DESCRIPTION_IPV4 = "Enable the flooding protection feature for IPv4.";
     private static final String FP_ENABLED_PROP_NAME_IPV6 = "flooding.protection.enabled.ipv6";
-    private static final String FP_ENABLED_DESCRIPTION_IPV6 = "Enable the flooding protection feature for IPv6. "
-            + "If the device does not support IPv6, this property will be ignored. "
-            + "In kernel versions less than 6.x, after disabling the feature by setting this field to false, "
-            + "a reboot may be needed to completely disable the filtering.";
     private static final boolean FP_ENABLED_DEFAULT_IPV4 = true;
     private static final boolean FP_ENABLED_DEFAULT_IPV6 = true;
 
@@ -175,11 +133,7 @@ public class FloodingProtectionOptions {
     }
 
     public Set<String> getFloodingProtectionFilterRulesIPv6() {
-        if (isIPv6Enabled()) {
-            return new LinkedHashSet<>(Arrays.asList(FLOODING_PROTECTION_FILTER_RULES_IPV6));
-        } else {
-            return new LinkedHashSet<>();
-        }
+        return new LinkedHashSet<>();
     }
 
     public Set<String> getFloodingProtectionNatRulesIPv6() {
@@ -229,28 +183,47 @@ public class FloodingProtectionOptions {
     public Tocd getDefinition() {
         ObjectFactory objectFactory = new ObjectFactory();
         Tocd tocd = objectFactory.createTocd();
-        tocd.setName("Flooding Protection Service");
+        tocd.setName("%name");
+        tocd.setLocalization("OSGI-INF/l10n/FloodingProtectionConfigurator");
+        tocd.setLocaleUrls(findAllEntries(FrameworkUtil.getBundle(this.getClass()), tocd.getLocalization()));
+        tocd.setDescription("%description");
         tocd.setId(PID);
-        tocd.setDescription(FP_DESCRIPTION);
 
         Tad tadEnabled = objectFactory.createTad();
         tadEnabled.setId(FP_ENABLED_PROP_NAME_IPV4);
-        tadEnabled.setName(FP_ENABLED_PROP_NAME_IPV4);
+        tadEnabled.setName("%protectionv4.enabled");
         tadEnabled.setType(Tscalar.BOOLEAN);
         tadEnabled.setRequired(true);
         tadEnabled.setDefault(Boolean.toString(FP_ENABLED_DEFAULT_IPV4));
-        tadEnabled.setDescription(FP_ENABLED_DESCRIPTION_IPV4);
+        tadEnabled.setDescription("%protectionv4.enabledDesc");
         tocd.addAD(tadEnabled);
 
         Tad tadEnabledIpv6 = objectFactory.createTad();
         tadEnabledIpv6.setId(FP_ENABLED_PROP_NAME_IPV6);
-        tadEnabledIpv6.setName(FP_ENABLED_PROP_NAME_IPV6);
+        tadEnabledIpv6.setName("%protectionv6.enabled");
         tadEnabledIpv6.setType(Tscalar.BOOLEAN);
         tadEnabledIpv6.setRequired(true);
         tadEnabledIpv6.setDefault(Boolean.toString(FP_ENABLED_DEFAULT_IPV6));
-        tadEnabledIpv6.setDescription(FP_ENABLED_DESCRIPTION_IPV6);
+        tadEnabledIpv6.setDescription("%protectionv6.enabledDesc");
         tocd.addAD(tadEnabledIpv6);
 
         return tocd;
+    }
+
+    private static URL[] findAllEntries(Bundle bundle, String path) {
+        path = path == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : path;
+        String directory = "/"; //$NON-NLS-1$
+        String file = "*"; //$NON-NLS-1$
+        int index = path.lastIndexOf('/');
+        if (index > 0) {
+            directory = path.substring(0, index);
+        }
+
+        Enumeration<URL> entries = bundle.findEntries(directory, file, false);
+        if (entries == null) {
+            return new URL[0];
+        }
+        List<URL> list = Collections.list(entries);
+        return list.toArray(new URL[list.size()]);
     }
 }

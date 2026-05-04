@@ -24,8 +24,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.net.admin.FirewallConfigurationService;
-import org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6;
+import org.eclipse.kura.net.firewall.FirewallConfigurationService;
+import org.eclipse.kura.net.firewall.FirewallConfigurationServiceIPv6;
 import org.eclipse.kura.security.FloodingProtectionConfigurationService;
 import org.eclipse.kura.security.ThreatManagerService;
 import org.slf4j.Logger;
@@ -125,14 +125,18 @@ public class FloodingProtectionConfigurator
 
     private void configureThreshold(String fileName, int value) {
         Path sourceFile = Paths.get(fileName);
-        if (Files.exists(sourceFile)) {
-            try {
-                Files.write(sourceFile, Integer.toString(value).getBytes());
-            } catch (IOException e) {
-                logger.error("Cannot write to " + sourceFile, e);
-            }
-        } else {
+        if (!Files.exists(sourceFile)) {
             logger.warn("File {} does not exists.", fileName);
+            return;
+        }
+        if (!Files.isWritable(sourceFile)) {
+            logger.debug("Skipping threshold update; {} is read-only (container or restricted env).", sourceFile);
+            return;
+        }
+        try {
+            Files.write(sourceFile, Integer.toString(value).getBytes());
+        } catch (IOException e) {
+            logger.error("Cannot write to " + sourceFile, e);
         }
     }
 

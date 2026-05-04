@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.nm.signal.handlers;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.kura.nm.enums.NMDeviceState;
@@ -26,12 +27,12 @@ public class NMDeviceStateChangeHandler implements DBusSigHandler<Device.StateCh
 
     private final CountDownLatch latch;
     private final String path;
-    private final NMDeviceState expectedState;
+    private final List<NMDeviceState> expectedStates;
 
-    public NMDeviceStateChangeHandler(CountDownLatch latch, String path, NMDeviceState expectedNmDeviceState) {
+    public NMDeviceStateChangeHandler(CountDownLatch latch, String path, List<NMDeviceState> expectedStates) {
         this.latch = latch;
         this.path = path;
-        this.expectedState = expectedNmDeviceState;
+        this.expectedStates = expectedStates;
     }
 
     @Override
@@ -39,9 +40,11 @@ public class NMDeviceStateChangeHandler implements DBusSigHandler<Device.StateCh
 
         NMDeviceState oldState = NMDeviceState.fromUInt32(s.getOldState());
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
-
+        if (this.latch.getCount() == 0) {
+            return;
+        }
         logger.trace("Device state change detected: {} -> {}, for {}", oldState, newState, s.getPath());
-        if (s.getPath().equals(this.path) && newState == this.expectedState) {
+        if (s.getPath().equals(this.path) && expectedStates.contains(newState)) {
             logger.debug("Notify waiting thread");
             this.latch.countDown();
         }
