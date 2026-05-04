@@ -35,8 +35,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator;
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionOptions;
-import org.eclipse.kura.net.admin.FirewallConfigurationService;
-import org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6;
+// fork moved these to org.eclipse.kura.net.firewall.* (was org.eclipse.kura.net.admin.*)
+import org.eclipse.kura.net.firewall.FirewallConfigurationService;
+import org.eclipse.kura.net.firewall.FirewallConfigurationServiceIPv6;
 import org.junit.After;
 import org.junit.Test;
 

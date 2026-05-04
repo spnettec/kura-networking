@@ -51,6 +51,12 @@
                 <configuration>
                     <testSourceDirectory>${basedir}/src/test/java/</testSourceDirectory>
                     <testClassesDirectory>${project.build.directory}/test-classes/</testClassesDirectory>
+                    <!-- byte-buddy 1.18.x knows up to Java 19 (class file 63);
+                         Java 21 (65) needs the experimental flag for mockito
+                         to mock non-trivial classes. -->
+                    <systemPropertyVariables>
+                        <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
