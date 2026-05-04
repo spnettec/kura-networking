@@ -14,27 +14,38 @@
      Eurotech
 
 -->
-<target name="kura-networking Target Definition" sequenceNumber="75">
+<target name="kura-networking Target Definition" sequenceNumber="76">
     <locations>
+        <!--
+            Single Maven location, no Profile location with absolute paths. All
+            bundles resolve from ~/.m2:
+              - kura-bom: kura framework bundles (org.eclipse.kura.api, .core, …)
+                that networking bundles depend on, by name.
+              - target-platform-pde-deps: P2 third-party bundles (commons-io,
+                bouncycastle, jakarta, asm, …) — produced by monorepo's
+                target-platform reficio.
+              - org.eclipse.kura.linux.position: explicit kura framework bundle
+                (NM bundle has an optional dependency on it).
+
+            Setup (once per fresh ~/.m2):
+                mvn -f kura/target-platform/pom.xml install
+                mvn -f kura/kura/kura-bom/pom.xml install
+            then any kura-networking reactor build resolves on any machine.
+        -->
         <location includeDependencyDepth="direct" includeDependencyScopes="compile,test" missingManifest="ignore" type="Maven">
 
             <dependencies>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>kura-bom</artifactId>
+                    <version>6.0.0-SNAPSHOT</version>
+                    <type>pom</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>target-platform-pde-deps</artifactId>
                     <version>6.0.0-SNAPSHOT</version>
                     <type>pom</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.eclipse.kura</groupId>
-                    <artifactId>kura-pde-deps</artifactId>
-                    <version>6.0.0-SNAPSHOT</version>
-                    <type>pom</type>
-                </dependency>
-                <dependency>
-                    <groupId>org.eclipse.kura</groupId>
-                    <artifactId>org.eclipse.kura.linux.position</artifactId>
-                    <version>2.0.0-SNAPSHOT</version>
                 </dependency>
             </dependencies>
 
