@@ -100,7 +100,7 @@ remove_dnsmasq_leases() {
 
 recover_web_ui_kura_properties() {
     if [ -f "${BASE_DIR}/${KURA_SYMLINK}/framework/kura.properties" ]; then
-        sed -i "s|^kura.have.net.admin=.*|kura.have.net.admin=false|" "${BASE_DIR}/${KURA_SYMLINK}/framework/kura.properties"
+        sed -i "s|^#*kura.have.net.admin=.*|kura.have.net.admin=false|" "${BASE_DIR}/${KURA_SYMLINK}/framework/kura.properties"
     fi
 }
 
