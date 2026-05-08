@@ -43,6 +43,11 @@ public class MockComponentConfiguration {
             }
 
             @Override
+            public OCD getLocalizedDefinition(String locale) {
+                return getDefinition();
+            }
+
+            @Override
             public Map<String, Object> getConfigurationProperties() {
                 return Collections.emptyMap();
             }
