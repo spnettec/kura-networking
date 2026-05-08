@@ -1037,10 +1037,10 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 final String id = i.getArgument(0);
                 final Result result = this.currentStatus.get(id);
 
-                if (result instanceof Success success) {
-                    return Optional.of((success.status));
-                } else if (result instanceof Failure failure) {
-                    throw failure.exception;
+                if (result instanceof Success) {
+                    return Optional.of((((Success) result).status));
+                } else if (result instanceof Failure) {
+                    throw ((Failure) result).exception;
                 }
 
                 return Optional.empty();
@@ -1105,7 +1105,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     private void givenLoopbackInterfaceWithFilledIP4Address(final String id) throws UnknownHostException {
         givenNetworkStatus(
                 LoopbackInterfaceStatus.builder().withInterfaceId(id)
-                        .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address>builder()
+                        .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address> builder()
                                 .withAddresses(Arrays.asList(
                                         new NetworkInterfaceIpAddress<>(ipV4Address(1, 2, 3, 4), (short) 16),
                                         new NetworkInterfaceIpAddress<>(ipV4Address(5, 6, 7, 0xff), (short) 32)))
@@ -1116,7 +1116,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
 
     private void givenLoopbackInterfaceWithFilledIP6Address(final String id) throws UnknownHostException {
         givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id)
-                .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder()
+                .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address> builder()
                         .withAddresses(Arrays.asList(
                                 new NetworkInterfaceIpAddress<>(ipV6Address(1, 2, 3, 4, 5, 0), (short) 16),
                                 new NetworkInterfaceIpAddress<>(ipV6Address(5, 6, 7, 0xff, 5, 0), (short) 32)))
@@ -1127,13 +1127,13 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     private void givenLoopbackInterfaceWithUnFilledIP4Address(final String id) {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id)
-                .withInterfaceIp4Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address>builder().build())));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id).withInterfaceIp4Addresses(
+                Optional.of(NetworkInterfaceIpAddressStatus.<IP4Address> builder().build())));
     }
 
     private void givenLoopbackInterfaceWithUnFilledIP6Address(final String id) {
-        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id)
-                .withInterfaceIp6Addresses(Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address>builder().build())));
+        givenNetworkStatus(LoopbackInterfaceStatus.builder().withInterfaceId(id).withInterfaceIp6Addresses(
+                Optional.of(NetworkInterfaceIpAddressStatus.<IP6Address> builder().build())));
     }
 
     private void givenExceptionThrownByNetworkStatusServiceMethods(final Exception exception) {
