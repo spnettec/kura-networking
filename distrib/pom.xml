@@ -83,9 +83,9 @@
     </organization>
 
     <properties>
-        <addon.5s.installation.dir>/opt/eclipse/kura/plugins/5s</addon.5s.installation.dir>
-        <addon.4s.installation.dir>/opt/eclipse/kura/plugins/4s</addon.4s.installation.dir>
-        <addon.4.installation.dir>/opt/eclipse/kura/plugins/4</addon.4.installation.dir>
+        <addon.5s.installation.dir>/opt/eclipse/kura/siblings/networking/5s</addon.5s.installation.dir>
+        <addon.4s.installation.dir>/opt/eclipse/kura/siblings/networking/4s</addon.4s.installation.dir>
+        <addon.4.installation.dir>/opt/eclipse/kura/siblings/networking/4</addon.4.installation.dir>
 
         <org.eclipse.kura.linux.net.name>org.eclipse.kura.linux.net</org.eclipse.kura.linux.net.name>
         <org.eclipse.kura.net.admin.firewall.name>org.eclipse.kura.net.admin.firewall</org.eclipse.kura.net.admin.firewall.name>
