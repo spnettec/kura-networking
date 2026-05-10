@@ -112,7 +112,7 @@ public class NMDbusConnector {
 
     private ModemTaskManager modemTaskManager;
     private int timeout = 30;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor(Thread.ofVirtual().factory());
     private CompletableFuture<Void> configurationTask;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
