@@ -69,17 +69,17 @@ install_named_config() {
 }
 
 disable_netplan() {
-    # disable netplan configuration files
-    backup_files kurasave /{lib,etc}/netplan/*.yaml
-
+    # Override netplan renderer to NetworkManager via highest-priority drop-in.
+    # Existing yamls are kept so that interface configs (e.g. eth0 dhcp4) are
+    # inherited by NM through netplan merge — otherwise the gateway would lose
+    # IPv4 connectivity between install and the first Kura UI configuration.
     if [ -d /etc/netplan  ]; then
-
-    # use NM renderer
         cat > /etc/netplan/zz-kura-use-nm.yaml <<EOF
 network:
   version: 2
   renderer: NetworkManager
 EOF
+        chmod 600 /etc/netplan/zz-kura-use-nm.yaml
     fi
 }
 
@@ -145,6 +145,14 @@ setup_network_manager() {
     install_named_config
 
     disable_netplan
+
+    # Bring NetworkManager up immediately so the gateway keeps IPv4 between
+    # install and reboot — relying solely on reboot has bitten users on
+    # cloud/VM installs where reconnecting requires SSH.
+    systemctl start NetworkManager > /dev/null 2>&1
+    if command -v netplan > /dev/null 2>&1; then
+        netplan apply > /dev/null 2>&1
+    fi
 }
 
 setup_dnsmasq_conf_file() {
