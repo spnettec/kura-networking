@@ -15,7 +15,6 @@ Import-Package:
  org.apache.commons.lang3;version="3.1.0",
  org.apache.commons.net.util;version="3.1.0",
  org.eclipse.kura;version="[1.1,2.0)",
- org.eclipse.kura.command;version="[1.2,2.0)",
  org.eclipse.kura.core.linux.executor;version="[1.0,2.0)",
  org.eclipse.kura.core.linux.util;version="[1.1,2.0)",
  org.eclipse.kura.core.net;version="[1.0,2.0)",
