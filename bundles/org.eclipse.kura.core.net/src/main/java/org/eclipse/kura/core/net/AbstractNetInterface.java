@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterface;

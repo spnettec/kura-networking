@@ -257,6 +257,7 @@ public class NMDbusConnector {
             }
 
             switch (deviceType) {
+            case NM_DEVICE_TYPE_VETH:
             case NM_DEVICE_TYPE_ETHERNET:
                 Wired wiredDevice = this.dbusConnection.getRemoteObject(NM_BUS_NAME, device.get().getObjectPath(),
                         Wired.class);

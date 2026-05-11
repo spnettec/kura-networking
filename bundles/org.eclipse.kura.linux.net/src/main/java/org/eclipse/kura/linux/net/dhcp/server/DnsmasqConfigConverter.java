@@ -14,7 +14,7 @@ package org.eclipse.kura.linux.net.dhcp.server;
 
 import static java.util.Objects.isNull;
 
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 

@@ -17,7 +17,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;

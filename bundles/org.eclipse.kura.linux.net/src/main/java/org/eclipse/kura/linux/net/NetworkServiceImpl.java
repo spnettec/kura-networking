@@ -43,7 +43,7 @@ import org.eclipse.kura.core.net.WifiInterfaceAddressImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;

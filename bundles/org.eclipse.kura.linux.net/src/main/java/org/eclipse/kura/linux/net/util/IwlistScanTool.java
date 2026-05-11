@@ -28,7 +28,7 @@ import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;

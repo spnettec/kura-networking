@@ -25,7 +25,7 @@ import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.net.IP4Address;

@@ -273,6 +273,7 @@ public class NMStatusConverter {
         }
 
         switch (devicePropertiesWrapper.getDeviceType()) {
+        case NM_DEVICE_TYPE_VETH:
         case NM_DEVICE_TYPE_ETHERNET:
             return specificProperties.get().Get(NM_DEVICE_WIRED_BUS_NAME, NM_DEVICE_PROPERTY_HW_ADDRESS);
         case NM_DEVICE_TYPE_WIFI:

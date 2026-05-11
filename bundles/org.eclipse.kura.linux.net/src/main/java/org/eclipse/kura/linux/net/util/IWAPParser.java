@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.util.base.StringUtil;

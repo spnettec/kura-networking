@@ -36,7 +36,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;

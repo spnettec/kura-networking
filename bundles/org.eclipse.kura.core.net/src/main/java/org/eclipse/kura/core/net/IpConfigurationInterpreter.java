@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;

@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.util.net.NetworkUtil;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceType;
