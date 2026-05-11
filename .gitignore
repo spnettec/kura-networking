@@ -14,3 +14,4 @@ lib
 hs_err_pid*.log
 .tycho-consumer-pom.xml
 
+__pycache__/
