@@ -764,6 +764,10 @@ public class NMDbusConnector {
         }
     }
 
+    public boolean configurationEnforcementIsActive() {
+        return Objects.nonNull(this.configurationEnforcementHandler) && Objects.nonNull(this.deviceAddedHandler);
+    }
+
     public List<Location> getAvailableMMLocations() {
         List<Location> availableLocations = new ArrayList<>();
 
