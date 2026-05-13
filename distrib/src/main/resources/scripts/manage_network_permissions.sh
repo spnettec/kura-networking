@@ -15,10 +15,11 @@
 
 function create_polkit_rules {
 
-    # get polkit package version
-    POLKIT=$(apt list --installed | grep libpolkit)
-    IFS=" " POLKIT_ARRAY=($POLKIT)
-    POLKIT_VERSION=${POLKIT_ARRAY[1]}
+    # get polkit package version without using apt's interactive CLI
+    POLKIT_VERSION=$(dpkg-query -W -f='${Version}' 'libpolkit*' 2>/dev/null | head -n 1)
+    if [ -z "${POLKIT_VERSION}" ]; then
+        POLKIT_VERSION=0
+    fi
 
     # add polkit policy
     if [[ ${POLKIT_VERSION} < 0.106 ]]; then

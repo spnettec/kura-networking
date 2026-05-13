@@ -21,9 +21,8 @@ fi
 echo ""
 echo "Uninstalling Kura networking..."
 export TIMESTAMP=`date +%Y%m%d%H%M`
-export LOG=/tmp/kura_network_uninstall_${TIMESTAMP}.log
+export LOG_FILE=kura_network_install_${TIMESTAMP}.log
+export LOG=/var/log/${LOG_FILE}
 
-bash /opt/eclipse/kura/.data/kura_network_uninstall.sh remove /opt/eclipse kura 2>&1 | tee -a $LOG | systemd-cat -t Kura
+bash /opt/eclipse/kura/.data/kura_network_uninstall.sh remove /opt/eclipse kura 2>&1 | tee -a "$LOG" | systemd-cat -t Kura
 
-mkdir -p /opt/eclipse/kura/log
-mv $LOG /opt/eclipse/kura/log/

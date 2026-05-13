@@ -17,7 +17,7 @@ BASE_DIR=$2
 KURA_SYMLINK=$3
 
 # shellcheck source=/dev/null
-source "${BASE_DIR}/${KURA_SYMLINK}/.data/install_config.sh"
+source "${BASE_DIR}/${KURA_SYMLINK}/.data/install_network_config.sh"
 
 restore_backup_files() {
     SUFFIX="${1}"
@@ -33,12 +33,12 @@ restore_backup_files() {
 }
 
 restore_named_config() {
-    mv /var/named/named.ca.kurasave /var/named/named.ca
-    mv /etc/bind/named.conf.kurasave /etc/bind/named.conf
-    mv /etc/named.rfc1912.zones.kurasave /etc/named.rfc1912.zones
+    [ -f /var/named/named.ca.kurasave ] && mv /var/named/named.ca.kurasave /var/named/named.ca
+    [ -f /etc/bind/named.conf.kurasave ] && mv /etc/bind/named.conf.kurasave /etc/bind/named.conf
+    [ -f /etc/named.rfc1912.zones.kurasave ] && mv /etc/named.rfc1912.zones.kurasave /etc/named.rfc1912.zones
 
     if [ -d /etc/apparmor.d ]; then
-        rm /etc/apparmor.d/usr.sbin.named
+        rm -f /etc/apparmor.d/usr.sbin.named
     fi
 }
 

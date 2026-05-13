@@ -20,9 +20,18 @@ KURA_SYMLINK=$3
 source "${BASE_DIR}/${KURA_SYMLINK}/.data/install_network_config.sh"
 
 error_state() {
-    echo "$1"
+    echo ""
     touch /tmp/install_error
     exit 1
+}
+
+systemctl_if_present() {
+    ACTION=""
+    SERVICE=""
+
+    if systemctl list-unit-files ".service" > /dev/null 2>&1 || systemctl list-units --all ".service" > /dev/null 2>&1; then
+        systemctl "" "" > /dev/null 2>&1 || true
+    fi
 }
 
 backup_files() {
@@ -85,26 +94,26 @@ EOF
 
 setup_network_manager() {
     systemctl daemon-reload
-    systemctl disable firewalld
-    systemctl disable iptables
-    systemctl disable ip6tables
-    systemctl enable firewall
-    systemctl enable NetworkManager
-    systemctl enable ModemManager
-    systemctl stop dnsmasq
-    systemctl disable dnsmasq
-    systemctl stop isc-dhcp-server
-    systemctl disable isc-dhcp-server
-    systemctl stop isc-dhcp-server6
-    systemctl disable isc-dhcp-server6
-    systemctl stop hostapd
-    systemctl disable hostapd
-    systemctl stop dhcpcd
-    systemctl disable dhcpcd
-    systemctl stop dhcpcd5
-    systemctl disable dhcpcd5
-    systemctl stop systemd-networkd
-    systemctl disable systemd-networkd
+    systemctl_if_present disable firewalld
+    systemctl_if_present disable iptables
+    systemctl_if_present disable ip6tables
+    systemctl_if_present enable firewall
+    systemctl_if_present enable NetworkManager
+    systemctl_if_present enable ModemManager
+    systemctl_if_present stop dnsmasq
+    systemctl_if_present disable dnsmasq
+    systemctl_if_present stop isc-dhcp-server
+    systemctl_if_present disable isc-dhcp-server
+    systemctl_if_present stop isc-dhcp-server6
+    systemctl_if_present disable isc-dhcp-server6
+    systemctl_if_present stop hostapd
+    systemctl_if_present disable hostapd
+    systemctl_if_present stop dhcpcd
+    systemctl_if_present disable dhcpcd
+    systemctl_if_present stop dhcpcd5
+    systemctl_if_present disable dhcpcd5
+    systemctl_if_present stop systemd-networkd
+    systemctl_if_present disable systemd-networkd
 
     # setup iptables
     if [ ! -d /etc/sysconfig ]; then
