@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Copyright (c) 2026 Eurotech and/or its affiliates and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+case "$1" in
+    configure)
+        ;;
+
+    abort-remove|abort-upgrade)
+        echo "Installation did not complete."
+        exit 1
+        ;;
+
+    *)
+        echo "postinst script called with unknown parameter $1"
+        exit 1
+        ;;
+esac
+
+echo "Installing Kura firewall-only support..."
+
+disable_placeholder_rules_file() {
+    local rules_file="$1"
+    local disabled_file
+
+    if [ ! -f "$rules_file" ]; then
+        return
+    fi
+
+    if ! grep -Eq "ETH_INTERFACE_|WIFI_INTERFACE_" "$rules_file"; then
+        return
+    fi
+
+    disabled_file="${rules_file}.kura-firewall-only-disabled"
+    if [ -e "$disabled_file" ]; then
+        disabled_file="${disabled_file}.$(date +%Y%m%d%H%M%S)"
+    fi
+
+    mv "$rules_file" "$disabled_file"
+    echo "Disabled placeholder firewall rules: $rules_file -> $disabled_file"
+}
+
+if [ ! -d /etc/sysconfig ]; then
+    mkdir /etc/sysconfig
+fi
+
+disable_placeholder_rules_file /etc/sysconfig/iptables
+disable_placeholder_rules_file /etc/sysconfig/ip6tables
+
+if [ -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ]; then
+    python3 /opt/eclipse/kura/kura-firewall-install/customize_firewall_snapshot.py \
+        /opt/eclipse/kura/user/snapshots/snapshot_0.xml
+fi
+
+if [ -f /opt/eclipse/kura/framework/kura.properties ]; then
+    if grep -q "^#*kura.have.firewall.admin=" /opt/eclipse/kura/framework/kura.properties; then
+        sed -i "s|^#*kura.have.firewall.admin=.*|kura.have.firewall.admin=true|" \
+            /opt/eclipse/kura/framework/kura.properties
+    else
+        echo "kura.have.firewall.admin=true" >> /opt/eclipse/kura/framework/kura.properties
+    fi
+fi
+
+if command -v systemctl > /dev/null 2>&1; then
+    systemctl daemon-reload > /dev/null 2>&1 || true
+    systemctl disable firewall > /dev/null 2>&1 || true
+fi
+
+sync
+
+echo "Kura firewall-only installation completed."

@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# Copyright (c) 2026 Eurotech and/or its affiliates and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+iptables_config_file=/etc/sysconfig/iptables
+ip6tables_config_file=/etc/sysconfig/ip6tables
+
+restore_rules_file() {
+    local rules_file="$1"
+    local restore_command="$2"
+
+    if [ ! -f "$rules_file" ]; then
+        return
+    fi
+
+    if grep -Eq "ETH_INTERFACE_|WIFI_INTERFACE_" "$rules_file"; then
+        echo "Skipping placeholder firewall rules: $rules_file"
+        return
+    fi
+
+    if ! command -v "$restore_command" > /dev/null 2>&1; then
+        echo "Skipping $rules_file: $restore_command is not available"
+        return
+    fi
+
+    "$restore_command" < "$rules_file"
+}
+
+if [ ! -f "$iptables_config_file" ] && [ ! -f "$ip6tables_config_file" ]; then
+    exit 0
+fi
+
+restore_rules_file "$iptables_config_file" iptables-restore
+restore_rules_file "$ip6tables_config_file" ip6tables-restore

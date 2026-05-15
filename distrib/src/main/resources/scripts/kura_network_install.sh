@@ -26,11 +26,11 @@ error_state() {
 }
 
 systemctl_if_present() {
-    ACTION=""
-    SERVICE=""
+    ACTION="$1"
+    SERVICE="$2"
 
-    if systemctl list-unit-files ".service" > /dev/null 2>&1 || systemctl list-units --all ".service" > /dev/null 2>&1; then
-        systemctl "" "" > /dev/null 2>&1 || true
+    if systemctl list-unit-files "${SERVICE}.service" > /dev/null 2>&1 || systemctl list-units --all "${SERVICE}.service" > /dev/null 2>&1; then
+        systemctl "${ACTION}" "${SERVICE}" > /dev/null 2>&1 || true
     fi
 }
 

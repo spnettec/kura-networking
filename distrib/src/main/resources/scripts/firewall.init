@@ -45,7 +45,7 @@ create_nat_chains() {
     iptables_command="$1"
 	custom_nat_chains=(prerouting-kura postrouting-kura input-kura output-kura)
 	for custom_chain in "${custom_nat_chains[@]}"; do
-	    chain=("${custom_chain//-/ }"[0])
+	    chain=("${custom_chain//-/ }")
 	    if ! "$iptables_command" -C "${chain[0]^^}" -j "$custom_chain" -t nat > /dev/null 2>&1; then
 	        "$iptables_command" -N "$custom_chain" -t nat > /dev/null 2>&1
 	        "$iptables_command" -I "${chain[0]^^}" -t nat -j "$custom_chain" > /dev/null 2>&1
@@ -57,7 +57,7 @@ create_nat_chains() {
 	fi
 	custom_nat_chains=(postrouting-kura-pf postrouting-kura-ipf)
 	for custom_chain in "${custom_nat_chains[@]}"; do
-	    if "$iptables_command" -C postrouting-kura -j "$custom_chain" -t nat > /dev/null 2>&1; then
+	    if ! "$iptables_command" -C postrouting-kura -j "$custom_chain" -t nat > /dev/null 2>&1; then
 	        "$iptables_command" -N "$custom_chain" -t nat > /dev/null 2>&1
 	        "$iptables_command" -I postrouting-kura -t nat -j "$custom_chain" > /dev/null 2>&1
 	    fi
@@ -65,10 +65,10 @@ create_nat_chains() {
 }
 
 create_mangle_chains() {
-    iptables_command="$1"
+	iptables_command="$1"
 	custom_mangle_chains=(prerouting-kura postrouting-kura input-kura output-kura forward-kura)
 	for custom_chain in "${custom_mangle_chains[@]}"; do
-	    chain=("${custom_chain//-/ }"[0])
+	    chain=("${custom_chain//-/ }")
 	    if ! "$iptables_command" -C "${chain[0]^^}" -j "$custom_chain" -t mangle > /dev/null 2>&1; then
 	        "$iptables_command" -N "$custom_chain" -t mangle > /dev/null 2>&1
 	        "$iptables_command" -I "${chain[0]^^}" -t mangle -j "$custom_chain" > /dev/null 2>&1
@@ -96,6 +96,7 @@ configure_policies() {
 configure_ip_forwarding() {
     config_file="$1"
     ipforward_config_file="$2"
+    enable_ipforwarding=false
 	# enable ip forwarding if needed
 	if [ -f "$config_file" ]; then
 		while IFS='' read -r line || [[ -n "$line" ]]; do

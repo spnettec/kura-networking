@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Copyright (c) 2026 Eurotech and/or its affiliates and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+echo ""
+echo "Uninstalling Kura firewall-only support..."
+
+if command -v systemctl > /dev/null 2>&1; then
+    systemctl disable firewall > /dev/null 2>&1 || true
+    systemctl daemon-reload > /dev/null 2>&1 || true
+fi
+
+if [ -f /opt/eclipse/kura/framework/kura.properties ]; then
+    sed -i "s|^#*kura.have.firewall.admin=.*|kura.have.firewall.admin=false|" \
+        /opt/eclipse/kura/framework/kura.properties
+fi
