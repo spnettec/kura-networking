@@ -47,6 +47,22 @@ disable_placeholder_rules_file() {
     echo "Disabled placeholder firewall rules: $rules_file -> $disabled_file"
 }
 
+set_kura_property() {
+    local key="$1"
+    local value="$2"
+    local properties_file=/opt/eclipse/kura/framework/kura.properties
+
+    if [ ! -f "$properties_file" ]; then
+        return
+    fi
+
+    if grep -q "^#*${key}=" "$properties_file"; then
+        sed -i "s|^#*${key}=.*|${key}=${value}|" "$properties_file"
+    else
+        echo "${key}=${value}" >> "$properties_file"
+    fi
+}
+
 if [ ! -d /etc/sysconfig ]; then
     mkdir /etc/sysconfig
 fi
@@ -59,14 +75,7 @@ if [ -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ]; then
         /opt/eclipse/kura/user/snapshots/snapshot_0.xml
 fi
 
-if [ -f /opt/eclipse/kura/framework/kura.properties ]; then
-    if grep -q "^#*kura.have.firewall.admin=" /opt/eclipse/kura/framework/kura.properties; then
-        sed -i "s|^#*kura.have.firewall.admin=.*|kura.have.firewall.admin=true|" \
-            /opt/eclipse/kura/framework/kura.properties
-    else
-        echo "kura.have.firewall.admin=true" >> /opt/eclipse/kura/framework/kura.properties
-    fi
-fi
+set_kura_property kura.have.firewall.admin true
 
 if command -v systemctl > /dev/null 2>&1; then
     systemctl daemon-reload > /dev/null 2>&1 || true

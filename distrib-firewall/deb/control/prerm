@@ -12,12 +12,25 @@
 echo ""
 echo "Uninstalling Kura firewall-only support..."
 
+set_kura_property() {
+    local key="$1"
+    local value="$2"
+    local properties_file=/opt/eclipse/kura/framework/kura.properties
+
+    if [ ! -f "$properties_file" ]; then
+        return
+    fi
+
+    if grep -q "^#*${key}=" "$properties_file"; then
+        sed -i "s|^#*${key}=.*|${key}=${value}|" "$properties_file"
+    else
+        echo "${key}=${value}" >> "$properties_file"
+    fi
+}
+
 if command -v systemctl > /dev/null 2>&1; then
     systemctl disable firewall > /dev/null 2>&1 || true
     systemctl daemon-reload > /dev/null 2>&1 || true
 fi
 
-if [ -f /opt/eclipse/kura/framework/kura.properties ]; then
-    sed -i "s|^#*kura.have.firewall.admin=.*|kura.have.firewall.admin=false|" \
-        /opt/eclipse/kura/framework/kura.properties
-fi
+set_kura_property kura.have.firewall.admin false
