@@ -128,7 +128,9 @@ public class LinuxNetworkUtil {
     }
 
     /*
-     * Returns null if the interface is not found
+     * Returns the current IP address of the interface. Prefers IPv4 over IPv6.
+     * Falls back to IPv6 if the interface has no IPv4 address.
+     * Returns null if the interface is not found or has no addresses.
      */
     public String getCurrentIpAddress(String ifaceName) throws KuraException {
         // ignore logical interfaces like "1-1.2"
@@ -137,8 +139,13 @@ public class LinuxNetworkUtil {
         }
 
         LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
-
-        return ifconfig != null ? ifconfig.getInetAddress() : null;
+        if (ifconfig == null) {
+            return null;
+        }
+        if (ifconfig.getInetAddress() != null) {
+            return ifconfig.getInetAddress();
+        }
+        return ifconfig.getInet6Address();
     }
 
     /*
@@ -1019,8 +1026,8 @@ public class LinuxNetworkUtil {
     }
 
     /*
-     * Returns true if both the inet address and inet mask are non-null.
-     * Returns false if the interface is not found.
+     * Returns true if the interface has either IPv4 (inet address + mask) or IPv6 addresses.
+     * Returns false if the interface is not found or has no addresses.
      */
     public boolean hasAddress(String ifaceName) throws KuraException {
         // ignore logical interfaces like "1-1.2"
@@ -1029,14 +1036,12 @@ public class LinuxNetworkUtil {
         }
 
         LinuxIfconfig ifconfig = getInterfaceConfiguration(ifaceName);
-
-        // FIXME: should we throw an exception if config is null?
-        boolean ret = false;
-        if (ifconfig != null && ifconfig.getInetAddress() != null && ifconfig.getInetMask() != null) {
-            ret = true;
+        if (ifconfig == null) {
+            return false;
         }
-
-        return ret;
+        boolean hasIpv4 = ifconfig.getInetAddress() != null && ifconfig.getInetMask() != null;
+        boolean hasIpv6 = ifconfig.getInet6Address() != null;
+        return hasIpv4 || hasIpv6;
     }
 
     /*

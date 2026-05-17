@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ public class IpAddrShow {
     public LinuxIfconfig[] exec() throws KuraException {
         execLink();
         execInet();
+        execInet6();
         return this.configs.toArray(new LinuxIfconfig[0]);
     }
 
@@ -217,6 +218,75 @@ public class IpAddrShow {
             }
             String inetmask = prefix2inetmask(prefix);
             config.setInetMask(inetmask);
+        }
+    }
+
+    private void execInet6() throws KuraException {
+        StringBuilder sb = new StringBuilder("ip -o -6 addr show");
+        if (this.ifaceName != null) {
+            sb.append(" dev ").append(this.ifaceName);
+        }
+        String[] cmd = sb.toString().split("\\s+");
+        Command command = new Command(cmd);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        if (!status.getExitStatus().isSuccessful()) {
+            // IPv6 may be disabled or unavailable — don't fail the whole exec()
+            logger.debug("IPv6 address command failed: {} (exit code: {})", sb,
+                    status.getExitStatus().getExitCode());
+            return;
+        }
+        parseExecInet6(new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
+    }
+
+    private void parseExecInet6(String commandOutput) throws KuraException {
+        // FIXME: one interface may carry multiple inet6 addresses; we store the last one parsed.
+        try {
+            for (String line : commandOutput.split("\n")) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                logger.debug(line);
+
+                String ifname = findIfname(line);
+                if (ifname == null) {
+                    logger.warn("Interface name not found in IPv6 output");
+                    continue;
+                }
+
+                LinuxIfconfig config = null;
+                for (LinuxIfconfig conf : this.configs) {
+                    if (conf.getName().equals(ifname)) {
+                        config = conf;
+                        break;
+                    }
+                }
+                if (config == null) {
+                    logger.warn("Config for interface {} not found for IPv6", ifname);
+                    continue;
+                }
+
+                String inet6 = findValue(line, "inet6", " ");
+                if (inet6 != null) {
+                    parseInet6(config, inet6);
+                }
+            }
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
+        }
+    }
+
+    private void parseInet6(LinuxIfconfig config, String inet6) {
+        String[] parts = inet6.split("/");
+        if (parts.length > 0) {
+            config.setInet6Address(parts[0]);
+            int prefix = 128;
+            if (parts.length > 1) {
+                prefix = Integer.parseInt(parts[1]);
+            }
+            config.setInet6Prefix(prefix);
         }
     }
 

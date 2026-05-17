@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,8 @@ public class LinuxIfconfig {
     private String peerInetAddr;
     private String inetBcast;
     private String inetMask;
+    private String inet6Address;
+    private int inet6Prefix;
     private int mtu;
     private boolean multicast;
     private Map<String, String> driver;
@@ -90,6 +92,22 @@ public class LinuxIfconfig {
         this.peerInetAddr = peerInetAddr;
     }
 
+    public String getInet6Address() {
+        return this.inet6Address;
+    }
+
+    public void setInet6Address(String inet6Address) {
+        this.inet6Address = inet6Address;
+    }
+
+    public int getInet6Prefix() {
+        return this.inet6Prefix;
+    }
+
+    public void setInet6Prefix(int inet6Prefix) {
+        this.inet6Prefix = inet6Prefix;
+    }
+
     public int getMtu() {
         return this.mtu;
     }
@@ -117,14 +135,10 @@ public class LinuxIfconfig {
     public boolean isUp() {
         if (this.up != null) {
             return this.up;
-        } else {
-            // old code
-            boolean ret = false;
-            if (this.inetAddress != null && this.inetMask != null) {
-                ret = true;
-            }
-            return ret;
         }
+        boolean hasIpv4 = this.inetAddress != null && this.inetMask != null;
+        boolean hasIpv6 = this.inet6Address != null;
+        return hasIpv4 || hasIpv6;
     }
 
     public void setUp(boolean up) {
