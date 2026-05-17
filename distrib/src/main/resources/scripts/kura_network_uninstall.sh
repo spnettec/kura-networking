@@ -57,11 +57,13 @@ restore_nm_installation() {
     fi
 
     # restore iptables
+    HAD_IPTABLES_BACKUP=0
     if test -f /etc/sysconfig/iptables.kurasave; then
         mv /etc/sysconfig/iptables.kurasave /etc/sysconfig/iptables
+        HAD_IPTABLES_BACKUP=1
     fi
     if test -f /proc/sys/net/ipv4/ip_forward.kurasave; then
-        mv "${BASE_DIR}/${KURA_SYMLINK}/.data/ip_forward.kurasave" /proc/sys/net/ipv4/ip_forward 
+        mv "${BASE_DIR}/${KURA_SYMLINK}/.data/ip_forward.kurasave" /proc/sys/net/ipv4/ip_forward
     fi
     
     # restore /etc/default/dnsmasq.kurasave
@@ -123,15 +125,75 @@ remove_kura_networking_service() {
     fi
 }
 
+flush_kernel_iptables() {
+    # Kura installs custom chains (input-kura, forward-kura, postrouting-kura, ...)
+    # and sets default policies to DROP. Restoring the on-disk config file alone
+    # leaves the running kernel locked down. Reset policies first so connectivity
+    # is preserved during the flush, then drop all rules and user chains.
+    if ! command -v iptables > /dev/null 2>&1; then
+        return
+    fi
+
+    echo "Flushing Kura-managed iptables rules from kernel..."
+
+    iptables -P INPUT ACCEPT 2>/dev/null || true
+    iptables -P FORWARD ACCEPT 2>/dev/null || true
+    iptables -P OUTPUT ACCEPT 2>/dev/null || true
+
+    for table in filter nat mangle raw; do
+        iptables -t "${table}" -F 2>/dev/null || true
+        iptables -t "${table}" -X 2>/dev/null || true
+    done
+
+    if command -v ip6tables > /dev/null 2>&1; then
+        ip6tables -P INPUT ACCEPT 2>/dev/null || true
+        ip6tables -P FORWARD ACCEPT 2>/dev/null || true
+        ip6tables -P OUTPUT ACCEPT 2>/dev/null || true
+        for table in filter mangle raw; do
+            ip6tables -t "${table}" -F 2>/dev/null || true
+            ip6tables -t "${table}" -X 2>/dev/null || true
+        done
+    fi
+}
+
+reapply_user_iptables_backup() {
+    # Only re-apply if restore_nm_installation actually moved a pre-Kura backup
+    # back into place. If there was no .kurasave, the file currently on disk is
+    # Kura's own iptables-save dump (full of input-kura/forward-kura rules) —
+    # restoring it would just put back what we just flushed.
+    if [ "${HAD_IPTABLES_BACKUP:-0}" != "1" ]; then
+        return
+    fi
+    if ! command -v iptables-restore > /dev/null 2>&1; then
+        return
+    fi
+    if [ ! -s /etc/sysconfig/iptables ]; then
+        return
+    fi
+    # Defensive: if the install script chained backups (saved a Kura-poisoned
+    # file as .kurasave during a re-install), the "backup" is actually a Kura
+    # rule dump. Re-applying it would re-create the input-kura/forward-kura/
+    # postrouting-kura chains we just flushed. Drop the file instead.
+    if grep -qE '^:?(input-kura|forward-kura|output-kura|prerouting-kura|postrouting-kura)' /etc/sysconfig/iptables; then
+        echo "Saved iptables backup contains Kura chains; discarding instead of reapplying."
+        rm -f /etc/sysconfig/iptables
+        return
+    fi
+    echo "Reapplying pre-Kura iptables backup..."
+    iptables-restore < /etc/sysconfig/iptables 2>/dev/null || true
+}
+
 
 kura_uninstall() {
     echo "Uninstalling Kura networking..."
-    
+
     if [ "${STATUS}" = "remove" ]; then
         echo "Configuring Kura networking..."
 
         bash "${BASE_DIR}/${KURA_SYMLINK}/.data/manage_network_permissions.sh" -u
         restore_nm_installation
+        flush_kernel_iptables
+        reapply_user_iptables_backup
         recover_dnsmasq_conf_file
         remove_dnsmasq_leases
 

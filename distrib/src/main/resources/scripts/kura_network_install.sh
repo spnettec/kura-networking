@@ -120,8 +120,21 @@ setup_network_manager() {
         mkdir /etc/sysconfig
     fi
 
+    # Back up the existing iptables file as .kurasave so uninstall can restore
+    # the pre-Kura state. But never back up a file that is itself a Kura rule
+    # dump (e.g. left behind by an older buggy uninstall): doing so chains Kura
+    # content through repeated install/uninstall cycles and resurrects the
+    # input-kura / forward-kura / postrouting-kura chains every time.
     if test -f /etc/sysconfig/iptables; then
-        mv /etc/sysconfig/iptables /etc/sysconfig/iptables.kurasave
+        if grep -qE '^:?(input-kura|forward-kura|output-kura|prerouting-kura|postrouting-kura)' /etc/sysconfig/iptables; then
+            rm -f /etc/sysconfig/iptables
+        elif test -f /etc/sysconfig/iptables.kurasave; then
+            # An earlier genuine backup is already saved; don't overwrite it
+            # with whatever state we're seeing now.
+            rm -f /etc/sysconfig/iptables
+        else
+            mv /etc/sysconfig/iptables /etc/sysconfig/iptables.kurasave
+        fi
     fi
     sed -i "s|KURA_DIR|${BASE_DIR}/${KURA_SYMLINK}|" /lib/systemd/system/firewall.service
     cp -p /proc/sys/net/ipv4/ip_forward "${BASE_DIR}/${KURA_SYMLINK}/.data/ip_forward.kurasave"

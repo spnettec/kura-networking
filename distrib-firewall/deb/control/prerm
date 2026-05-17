@@ -28,9 +28,41 @@ set_kura_property() {
     fi
 }
 
+flush_kernel_iptables() {
+    # firewall-only also pushes Kura chains + DROP policies into the live kernel.
+    # Uninstall must reset the kernel; otherwise SSH/web can stay locked out
+    # until the next reboot.
+    if ! command -v iptables > /dev/null 2>&1; then
+        return
+    fi
+
+    echo "Flushing Kura-managed iptables rules from kernel..."
+
+    iptables -P INPUT ACCEPT 2>/dev/null || true
+    iptables -P FORWARD ACCEPT 2>/dev/null || true
+    iptables -P OUTPUT ACCEPT 2>/dev/null || true
+
+    for table in filter nat mangle raw; do
+        iptables -t "${table}" -F 2>/dev/null || true
+        iptables -t "${table}" -X 2>/dev/null || true
+    done
+
+    if command -v ip6tables > /dev/null 2>&1; then
+        ip6tables -P INPUT ACCEPT 2>/dev/null || true
+        ip6tables -P FORWARD ACCEPT 2>/dev/null || true
+        ip6tables -P OUTPUT ACCEPT 2>/dev/null || true
+        for table in filter mangle raw; do
+            ip6tables -t "${table}" -F 2>/dev/null || true
+            ip6tables -t "${table}" -X 2>/dev/null || true
+        done
+    fi
+}
+
 if command -v systemctl > /dev/null 2>&1; then
     systemctl disable firewall > /dev/null 2>&1 || true
     systemctl daemon-reload > /dev/null 2>&1 || true
 fi
+
+flush_kernel_iptables
 
 set_kura_property kura.have.firewall.admin false
