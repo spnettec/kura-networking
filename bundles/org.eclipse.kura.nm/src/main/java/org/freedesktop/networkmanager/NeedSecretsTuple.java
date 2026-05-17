@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,32 +18,31 @@ import org.freedesktop.dbus.annotations.Position;
 /**
  * Auto-generated class.
  */
-public class NeedSecretsTuple extends Tuple {
-
+public class NeedSecretsTuple<A, B> extends Tuple {
     @Position(0)
-    private String username;
+    private A username;
     @Position(1)
-    private String password;
+    private B password;
 
-    public NeedSecretsTuple(String username, String password) {
+    public NeedSecretsTuple(A username, B password) {
         this.username = username;
         this.password = password;
     }
 
-    public void setUsername(String arg) {
-        this.username = arg;
+    public void setUsername(A arg) {
+        username = arg;
     }
 
-    public String getUsername() {
-        return this.username;
+    public A getUsername() {
+        return username;
     }
 
-    public void setPassword(String arg) {
-        this.password = arg;
+    public void setPassword(B arg) {
+        password = arg;
     }
 
-    public String getPassword() {
-        return this.password;
+    public B getPassword() {
+        return password;
     }
 
 }

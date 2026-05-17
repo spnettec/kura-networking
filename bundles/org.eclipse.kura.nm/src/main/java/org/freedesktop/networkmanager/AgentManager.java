@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,10 +22,10 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusInterfaceName("org.freedesktop.NetworkManager.AgentManager")
 public interface AgentManager extends DBusInterface {
 
-    public void Register(String identifier);
+    void Register(String identifier);
 
-    public void RegisterWithCapabilities(String identifier, UInt32 capabilities);
+    void RegisterWithCapabilities(String identifier, UInt32 capabilities);
 
-    public void Unregister();
+    void Unregister();
 
 }

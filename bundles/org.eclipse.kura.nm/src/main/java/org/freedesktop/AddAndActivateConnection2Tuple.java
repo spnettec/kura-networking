@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,53 +12,48 @@
  *******************************************************************************/
 package org.freedesktop;
 
-import java.util.Map;
-
-import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
-public class AddAndActivateConnection2Tuple extends Tuple {
-
+public class AddAndActivateConnection2Tuple<A, B, C> extends Tuple {
     @Position(0)
-    private DBusPath path;
+    private A path;
     @Position(1)
-    private DBusPath activeConnection;
+    private B activeConnection;
     @Position(2)
-    private Map<String, Variant<?>> result;
+    private C result;
 
-    public AddAndActivateConnection2Tuple(DBusPath path, DBusPath activeConnection, Map<String, Variant<?>> result) {
+    public AddAndActivateConnection2Tuple(A path, B activeConnection, C result) {
         this.path = path;
         this.activeConnection = activeConnection;
         this.result = result;
     }
 
-    public void setPath(DBusPath arg) {
-        this.path = arg;
+    public void setPath(A arg) {
+        path = arg;
     }
 
-    public DBusPath getPath() {
-        return this.path;
+    public A getPath() {
+        return path;
     }
 
-    public void setActiveConnection(DBusPath arg) {
-        this.activeConnection = arg;
+    public void setActiveConnection(B arg) {
+        activeConnection = arg;
     }
 
-    public DBusPath getActiveConnection() {
-        return this.activeConnection;
+    public B getActiveConnection() {
+        return activeConnection;
     }
 
-    public void setResult(Map<String, Variant<?>> arg) {
-        this.result = arg;
+    public void setResult(C arg) {
+        result = arg;
     }
 
-    public Map<String, Variant<?>> getResult() {
-        return this.result;
+    public C getResult() {
+        return result;
     }
 
 }

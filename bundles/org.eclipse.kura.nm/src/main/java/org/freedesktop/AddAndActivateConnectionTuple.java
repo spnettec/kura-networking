@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,39 +12,37 @@
  *******************************************************************************/
 package org.freedesktop;
 
-import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
 
 /**
  * Auto-generated class.
  */
-public class AddAndActivateConnectionTuple extends Tuple {
-
+public class AddAndActivateConnectionTuple<A, B> extends Tuple {
     @Position(0)
-    private DBusPath path;
+    private A path;
     @Position(1)
-    private DBusPath activeConnection;
+    private B activeConnection;
 
-    public AddAndActivateConnectionTuple(DBusPath path, DBusPath activeConnection) {
+    public AddAndActivateConnectionTuple(A path, B activeConnection) {
         this.path = path;
         this.activeConnection = activeConnection;
     }
 
-    public void setPath(DBusPath arg) {
-        this.path = arg;
+    public void setPath(A arg) {
+        path = arg;
     }
 
-    public DBusPath getPath() {
-        return this.path;
+    public A getPath() {
+        return path;
     }
 
-    public void setActiveConnection(DBusPath arg) {
-        this.activeConnection = arg;
+    public void setActiveConnection(B arg) {
+        activeConnection = arg;
     }
 
-    public DBusPath getActiveConnection() {
-        return this.activeConnection;
+    public B getActiveConnection() {
+        return activeConnection;
     }
 
 }

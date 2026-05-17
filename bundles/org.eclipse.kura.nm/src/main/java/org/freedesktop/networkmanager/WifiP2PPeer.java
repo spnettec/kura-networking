@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.networkmanager;
 
 import java.util.List;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -40,4 +39,5 @@ public interface WifiP2PPeer extends DBusInterface {
     public static interface PropertyWfdIEsType extends TypeRef<List<Byte>> {
 
     }
+
 }

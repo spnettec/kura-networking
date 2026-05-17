@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,42 +12,37 @@
  *******************************************************************************/
 package org.freedesktop.networkmanager;
 
-import java.util.Map;
-
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
-import org.freedesktop.dbus.types.UInt64;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
-public class GetAppliedConnectionTuple extends Tuple {
-
+public class GetAppliedConnectionTuple<A, B> extends Tuple {
     @Position(0)
-    private Map<String, Map<String, Variant<?>>> connection;
+    private A connection;
     @Position(1)
-    private UInt64 versionId;
+    private B versionId;
 
-    public GetAppliedConnectionTuple(Map<String, Map<String, Variant<?>>> connection, UInt64 versionId) {
+    public GetAppliedConnectionTuple(A connection, B versionId) {
         this.connection = connection;
         this.versionId = versionId;
     }
 
-    public void setConnection(Map<String, Map<String, Variant<?>>> arg) {
-        this.connection = arg;
+    public void setConnection(A arg) {
+        connection = arg;
     }
 
-    public Map<String, Map<String, Variant<?>>> getConnection() {
-        return this.connection;
+    public A getConnection() {
+        return connection;
     }
 
-    public void setVersionId(UInt64 arg) {
-        this.versionId = arg;
+    public void setVersionId(B arg) {
+        versionId = arg;
     }
 
-    public UInt64 getVersionId() {
-        return this.versionId;
+    public B getVersionId() {
+        return versionId;
     }
 
 }

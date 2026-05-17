@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -24,6 +23,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
 
 /**
@@ -33,41 +33,26 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Connections", type = Settings.PropertyConnectionsType.class, access = Access.READ)
 @DBusProperty(name = "Hostname", type = String.class, access = Access.READ)
 @DBusProperty(name = "CanModify", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "VersionId", type = UInt64.class, access = Access.READ)
 public interface Settings extends DBusInterface {
 
-    public List<DBusPath> ListConnections();
+    List<DBusPath> ListConnections();
 
-    public DBusPath GetConnectionByUuid(String uuid);
+    DBusPath GetConnectionByUuid(String uuid);
 
-    public DBusPath AddConnection(Map<String, Map<String, Variant<?>>> connection);
+    DBusPath AddConnection(Map<String, Map<String, Variant<?>>> connection);
 
-    public DBusPath AddConnectionUnsaved(Map<String, Map<String, Variant<?>>> connection);
+    DBusPath AddConnectionUnsaved(Map<String, Map<String, Variant<?>>> connection);
 
-    public AddConnection2Tuple AddConnection2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags,
-            Map<String, Variant<?>> args);
+    AddConnection2Tuple<DBusPath, Map<String, Variant<?>>> AddConnection2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags, Map<String, Variant<?>> args);
 
-    public LoadConnectionsTuple LoadConnections(List<String> filenames);
+    LoadConnectionsTuple<Boolean, List<String>> LoadConnections(List<String> filenames);
 
-    public boolean ReloadConnections();
+    boolean ReloadConnections();
 
-    public void SaveHostname(String hostname);
+    void SaveHostname(String hostname);
 
     public static interface PropertyConnectionsType extends TypeRef<List<DBusPath>> {
-
-    }
-
-    public static class PropertiesChanged extends DBusSignal {
-
-        private final Map<String, Variant<?>> properties;
-
-        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _properties);
-            this.properties = _properties;
-        }
-
-        public Map<String, Variant<?>> getProperties() {
-            return this.properties;
-        }
 
     }
 
@@ -75,13 +60,12 @@ public interface Settings extends DBusInterface {
 
         private final DBusPath connection;
 
-        public NewConnection(String _path, DBusPath _connection) throws DBusException {
-            super(_path, _connection);
-            this.connection = _connection;
+        public NewConnection(String path, DBusPath connection) throws DBusException {
+                super(path, connection);        this.connection = connection;
         }
 
         public DBusPath getConnection() {
-            return this.connection;
+            return connection;
         }
 
     }
@@ -90,14 +74,14 @@ public interface Settings extends DBusInterface {
 
         private final DBusPath connection;
 
-        public ConnectionRemoved(String _path, DBusPath _connection) throws DBusException {
-            super(_path, _connection);
-            this.connection = _connection;
+        public ConnectionRemoved(String path, DBusPath connection) throws DBusException {
+                super(path, connection);        this.connection = connection;
         }
 
         public DBusPath getConnection() {
-            return this.connection;
+            return connection;
         }
 
     }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,6 @@
 package org.freedesktop.networkmanager.connection;
 
 import java.util.List;
-import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -24,7 +22,6 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
@@ -45,6 +42,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Ip6Config", type = DBusPath.class, access = Access.READ)
 @DBusProperty(name = "Dhcp6Config", type = DBusPath.class, access = Access.READ)
 @DBusProperty(name = "Vpn", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "Controller", type = DBusPath.class, access = Access.READ)
 @DBusProperty(name = "Master", type = DBusPath.class, access = Access.READ)
 public interface Active extends DBusInterface {
 
@@ -57,34 +55,19 @@ public interface Active extends DBusInterface {
         private final UInt32 state;
         private final UInt32 reason;
 
-        public StateChanged(String _path, UInt32 _state, UInt32 _reason) throws DBusException {
-            super(_path, _state, _reason);
-            this.state = _state;
-            this.reason = _reason;
+        public StateChanged(String path, UInt32 state, UInt32 reason) throws DBusException {
+                super(path, state, reason);        this.state = state;
+                this.reason = reason;
         }
 
         public UInt32 getState() {
-            return this.state;
+            return state;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
 
     }
 
-    public static class PropertiesChanged extends DBusSignal {
-
-        private final Map<String, Variant<?>> properties;
-
-        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _properties);
-            this.properties = _properties;
-        }
-
-        public Map<String, Variant<?>> getProperties() {
-            return this.properties;
-        }
-
-    }
 }

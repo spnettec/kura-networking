@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.networkmanager.device;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -33,9 +32,9 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Peers", type = WifiP2P.PropertyPeersType.class, access = Access.READ)
 public interface WifiP2P extends DBusInterface {
 
-    public void StartFind(Map<String, Variant<?>> options);
+    void StartFind(Map<String, Variant<?>> options);
 
-    public void StopFind();
+    void StopFind();
 
     public static interface PropertyPeersType extends TypeRef<List<DBusPath>> {
 
@@ -45,13 +44,12 @@ public interface WifiP2P extends DBusInterface {
 
         private final DBusPath peer;
 
-        public PeerAdded(String _path, DBusPath _peer) throws DBusException {
-            super(_path, _peer);
-            this.peer = _peer;
+        public PeerAdded(String path, DBusPath peer) throws DBusException {
+                super(path, peer);        this.peer = peer;
         }
 
         public DBusPath getPeer() {
-            return this.peer;
+            return peer;
         }
 
     }
@@ -60,14 +58,14 @@ public interface WifiP2P extends DBusInterface {
 
         private final DBusPath peer;
 
-        public PeerRemoved(String _path, DBusPath _peer) throws DBusException {
-            super(_path, _peer);
-            this.peer = _peer;
+        public PeerRemoved(String path, DBusPath peer) throws DBusException {
+                super(path, peer);        this.peer = peer;
         }
 
         public DBusPath getPeer() {
-            return this.peer;
+            return peer;
         }
 
     }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.networkmanager.settings;
 
 import java.util.Map;
-
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -32,35 +31,36 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Filename", type = String.class, access = Access.READ)
 public interface Connection extends DBusInterface {
 
-    public void Update(Map<String, Map<String, Variant<?>>> properties);
+    void Update(Map<String, Map<String, Variant<?>>> properties);
 
-    public void UpdateUnsaved(Map<String, Map<String, Variant<?>>> properties);
+    void UpdateUnsaved(Map<String, Map<String, Variant<?>>> properties);
 
-    public void Delete();
+    void Delete();
 
-    public Map<String, Map<String, Variant<?>>> GetSettings();
+    Map<String, Map<String, Variant<?>>> GetSettings();
 
-    public Map<String, Map<String, Variant<?>>> GetSecrets(String settingName);
+    Map<String, Map<String, Variant<?>>> GetSecrets(String settingName);
 
-    public void ClearSecrets();
+    void ClearSecrets();
 
-    public void Save();
+    void Save();
 
-    public Map<String, Variant<?>> Update2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags,
-            Map<String, Variant<?>> args);
+    Map<String, Variant<?>> Update2(Map<String, Map<String, Variant<?>>> settings, UInt32 flags, Map<String, Variant<?>> args);
 
-    public static class PropertiesChanged extends DBusSignal {
+    public static class Updated extends DBusSignal {
 
-        private final Map<String, Variant<?>> properties;
-
-        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _properties);
-            this.properties = _properties;
-        }
-
-        public Map<String, Variant<?>> getProperties() {
-            return this.properties;
+        public Updated(String path) throws DBusException {
+                super(path);
         }
 
     }
+
+    public static class Removed extends DBusSignal {
+
+        public Removed(String path) throws DBusException {
+                super(path);
+        }
+
+    }
+
 }

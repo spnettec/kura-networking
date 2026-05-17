@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.modemmanager1;
 
 import java.util.List;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -40,15 +39,15 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "Removability", type = UInt32.class, access = Access.READ)
 public interface Sim extends DBusInterface {
 
-    public void SendPin(String pin);
+    void SendPin(String pin);
 
-    public void SendPuk(String puk, String pin);
+    void SendPuk(String puk, String pin);
 
-    public void EnablePin(String pin, boolean enabled);
+    void EnablePin(String pin, boolean enabled);
 
-    public void ChangePin(String oldPin, String newPin);
+    void ChangePin(String oldPin, String newPin);
 
-    public void SetPreferredNetworks(List<SetPreferredNetworksStruct> preferredNetworks);
+    void SetPreferredNetworks(List<SetPreferredNetworksPreferredNetworksStruct> preferredNetworks);
 
     public static interface PropertyEmergencyNumbersType extends TypeRef<List<String>> {
 
@@ -65,4 +64,5 @@ public interface Sim extends DBusInterface {
     public static interface PropertyGid2Type extends TypeRef<List<Byte>> {
 
     }
+
 }

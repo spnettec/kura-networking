@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.modemmanager1;
 
 import java.util.Map;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -41,23 +40,24 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Properties", type = Bearer.PropertyPropertiesType.class, access = Access.READ)
 public interface Bearer extends DBusInterface {
 
-    public void Connect();
+    void Connect();
 
-    public void Disconnect();
+    void Disconnect();
 
-    public static interface PropertyIp4ConfigType extends TypeRef<Map<String, Variant<?>>> {
-
-    }
-
-    public static interface PropertyIp6ConfigType extends TypeRef<Map<String, Variant<?>>> {
+    public static interface PropertyIp4ConfigType extends TypeRef<Map<String, Variant>> {
 
     }
 
-    public static interface PropertyStatsType extends TypeRef<Map<String, Variant<?>>> {
+    public static interface PropertyIp6ConfigType extends TypeRef<Map<String, Variant>> {
 
     }
 
-    public static interface PropertyPropertiesType extends TypeRef<Map<String, Variant<?>>> {
+    public static interface PropertyStatsType extends TypeRef<Map<String, Variant>> {
 
     }
+
+    public static interface PropertyPropertiesType extends TypeRef<Map<String, Variant>> {
+
+    }
+
 }

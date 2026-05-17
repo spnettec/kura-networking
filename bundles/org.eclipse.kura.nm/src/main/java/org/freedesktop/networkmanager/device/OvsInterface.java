@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,13 +12,8 @@
  *******************************************************************************/
 package org.freedesktop.networkmanager.device;
 
-import java.util.Map;
-
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
-import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
-import org.freedesktop.dbus.messages.DBusSignal;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
@@ -26,18 +21,4 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.NetworkManager.Device.OvsInterface")
 public interface OvsInterface extends DBusInterface {
 
-    public static class PropertiesChanged extends DBusSignal {
-
-        private final Map<String, Variant<?>> properties;
-
-        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _properties);
-            this.properties = _properties;
-        }
-
-        public Map<String, Variant<?>> getProperties() {
-            return this.properties;
-        }
-
-    }
 }

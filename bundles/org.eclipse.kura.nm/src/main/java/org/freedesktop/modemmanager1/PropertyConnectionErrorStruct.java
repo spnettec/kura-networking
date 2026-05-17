@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,6 @@ import org.freedesktop.dbus.annotations.Position;
  * Auto-generated class.
  */
 public class PropertyConnectionErrorStruct extends Struct {
-
     @Position(0)
     private final String member0;
     @Position(1)
@@ -31,11 +30,11 @@ public class PropertyConnectionErrorStruct extends Struct {
     }
 
     public String getMember0() {
-        return this.member0;
+        return member0;
     }
 
     public String getMember1() {
-        return this.member1;
+        return member1;
     }
 
 }

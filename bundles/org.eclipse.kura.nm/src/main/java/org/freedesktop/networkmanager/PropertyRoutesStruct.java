@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.networkmanager;
 
 import java.util.List;
-
 import org.freedesktop.dbus.Struct;
 import org.freedesktop.dbus.annotations.Position;
 import org.freedesktop.dbus.types.UInt32;
@@ -22,7 +21,6 @@ import org.freedesktop.dbus.types.UInt32;
  * Auto-generated class.
  */
 public class PropertyRoutesStruct extends Struct {
-
     @Position(0)
     private final List<Byte> member0;
     @Position(1)
@@ -40,19 +38,19 @@ public class PropertyRoutesStruct extends Struct {
     }
 
     public List<Byte> getMember0() {
-        return this.member0;
+        return member0;
     }
 
     public UInt32 getMember1() {
-        return this.member1;
+        return member1;
     }
 
     public List<Byte> getMember2() {
-        return this.member2;
+        return member2;
     }
 
     public UInt32 getMember3() {
-        return this.member3;
+        return member3;
     }
 
 }

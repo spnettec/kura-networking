@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,40 +12,37 @@
  *******************************************************************************/
 package org.freedesktop.networkmanager;
 
-import java.util.List;
-
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
 
 /**
  * Auto-generated class.
  */
-public class LoadConnectionsTuple extends Tuple {
-
+public class LoadConnectionsTuple<A, B> extends Tuple {
     @Position(0)
-    private boolean status;
+    private A status;
     @Position(1)
-    private List<String> failures;
+    private B failures;
 
-    public LoadConnectionsTuple(boolean status, List<String> failures) {
+    public LoadConnectionsTuple(A status, B failures) {
         this.status = status;
         this.failures = failures;
     }
 
-    public void setStatus(boolean arg) {
-        this.status = arg;
+    public void setStatus(A arg) {
+        status = arg;
     }
 
-    public boolean getStatus() {
-        return this.status;
+    public A getStatus() {
+        return status;
     }
 
-    public void setFailures(List<String> arg) {
-        this.failures = arg;
+    public void setFailures(B arg) {
+        failures = arg;
     }
 
-    public List<String> getFailures() {
-        return this.failures;
+    public B getFailures() {
+        return failures;
     }
 
 }

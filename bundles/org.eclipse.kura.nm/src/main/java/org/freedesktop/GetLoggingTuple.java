@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,32 +18,31 @@ import org.freedesktop.dbus.annotations.Position;
 /**
  * Auto-generated class.
  */
-public class GetLoggingTuple extends Tuple {
-
+public class GetLoggingTuple<A, B> extends Tuple {
     @Position(0)
-    private String level;
+    private A level;
     @Position(1)
-    private String domains;
+    private B domains;
 
-    public GetLoggingTuple(String level, String domains) {
+    public GetLoggingTuple(A level, B domains) {
         this.level = level;
         this.domains = domains;
     }
 
-    public void setLevel(String arg) {
-        this.level = arg;
+    public void setLevel(A arg) {
+        level = arg;
     }
 
-    public String getLevel() {
-        return this.level;
+    public A getLevel() {
+        return level;
     }
 
-    public void setDomains(String arg) {
-        this.domains = arg;
+    public void setDomains(B arg) {
+        domains = arg;
     }
 
-    public String getDomains() {
-        return this.domains;
+    public B getDomains() {
+        return domains;
     }
 
 }

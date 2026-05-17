@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.networkmanager;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -62,21 +61,26 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Ip6Connectivity", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "InterfaceFlags", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "HwAddress", type = String.class, access = Access.READ)
+@DBusProperty(name = "Ports", type = Device.PropertyPortsType.class, access = Access.READ)
 public interface Device extends DBusInterface {
 
-    public void Reapply(Map<String, Map<String, Variant<?>>> connection, UInt64 versionId, UInt32 flags);
+    void Reapply(Map<String, Map<String, Variant<?>>> connection, UInt64 versionId, UInt32 flags);
 
-    public GetAppliedConnectionTuple GetAppliedConnection(UInt32 flags);
+    GetAppliedConnectionTuple<Map<String, Map<String, Variant<?>>>, UInt64> GetAppliedConnection(UInt32 flags);
 
-    public void Disconnect();
+    void Disconnect();
 
-    public void Delete();
+    void Delete();
 
     public static interface PropertyAvailableConnectionsType extends TypeRef<List<DBusPath>> {
 
     }
 
-    public static interface PropertyLldpNeighborsType extends TypeRef<List<Map<String, Variant<?>>>> {
+    public static interface PropertyLldpNeighborsType extends TypeRef<List<Map<String, Variant>>> {
+
+    }
+
+    public static interface PropertyPortsType extends TypeRef<List<DBusPath>> {
 
     }
 
@@ -86,24 +90,24 @@ public interface Device extends DBusInterface {
         private final UInt32 oldState;
         private final UInt32 reason;
 
-        public StateChanged(String _path, UInt32 _newState, UInt32 _oldState, UInt32 _reason) throws DBusException {
-            super(_path, _newState, _oldState, _reason);
-            this.newState = _newState;
-            this.oldState = _oldState;
-            this.reason = _reason;
+        public StateChanged(String path, UInt32 newState, UInt32 oldState, UInt32 reason) throws DBusException {
+                super(path, newState, oldState, reason);        this.newState = newState;
+                this.oldState = oldState;
+                this.reason = reason;
         }
 
         public UInt32 getNewState() {
-            return this.newState;
+            return newState;
         }
 
         public UInt32 getOldState() {
-            return this.oldState;
+            return oldState;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
 
     }
+
 }

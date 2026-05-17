@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.modemmanager1;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -47,6 +46,7 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "HardwareRevision", type = String.class, access = Access.READ)
 @DBusProperty(name = "DeviceIdentifier", type = String.class, access = Access.READ)
 @DBusProperty(name = "Device", type = String.class, access = Access.READ)
+@DBusProperty(name = "Physdev", type = String.class, access = Access.READ)
 @DBusProperty(name = "Drivers", type = Modem.PropertyDriversType.class, access = Access.READ)
 @DBusProperty(name = "Plugin", type = String.class, access = Access.READ)
 @DBusProperty(name = "PrimaryPort", type = String.class, access = Access.READ)
@@ -67,31 +67,31 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "SupportedIpFamilies", type = UInt32.class, access = Access.READ)
 public interface Modem extends DBusInterface {
 
-    public void Enable(boolean enable);
+    void Enable(boolean enable);
 
-    public List<DBusPath> ListBearers();
+    List<DBusPath> ListBearers();
 
-    public DBusPath CreateBearer(Map<String, Variant<?>> properties);
+    DBusPath CreateBearer(Map<String, Variant<?>> properties);
 
-    public void DeleteBearer(DBusPath bearer);
+    void DeleteBearer(DBusPath bearer);
 
-    public void Reset();
+    void Reset();
 
-    public void FactoryReset(String code);
+    void FactoryReset(String code);
 
-    public void SetPowerState(UInt32 state);
+    void SetPowerState(UInt32 state);
 
-    public void SetCurrentCapabilities(UInt32 capabilities);
+    void SetCurrentCapabilities(UInt32 capabilities);
 
-    public void SetCurrentModes(SetCurrentModesStruct modes);
+    void SetCurrentModes(SetCurrentModesModesStruct modes);
 
-    public void SetCurrentBands(List<UInt32> bands);
+    void SetCurrentBands(List<UInt32> bands);
 
-    public void SetPrimarySimSlot(UInt32 simSlot);
+    void SetPrimarySimSlot(UInt32 simSlot);
 
-    public List<Map<String, Variant<?>>> GetCellInfo();
+    List<Map<String, Variant<?>>> GetCellInfo();
 
-    public String Command(String cmd, UInt32 timeout);
+    String Command(String cmd, UInt32 timeout);
 
     public static class StateChanged extends DBusSignal {
 
@@ -99,23 +99,22 @@ public interface Modem extends DBusInterface {
         private final int newparam;
         private final UInt32 reason;
 
-        public StateChanged(String _path, int _old, int _new, UInt32 _reason) throws DBusException {
-            super(_path, _old, _new, _reason);
-            this.old = _old;
-            this.newparam = _new;
-            this.reason = _reason;
+        public StateChanged(String path, int old, int newparam, UInt32 reason) throws DBusException {
+                super(path, old, newparam, reason);        this.old = old;
+                this.newparam = newparam;
+                this.reason = reason;
         }
 
         public int getOld() {
-            return this.old;
+            return old;
         }
 
         public int getNewparam() {
-            return this.newparam;
+            return newparam;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
 
     }
@@ -159,4 +158,5 @@ public interface Modem extends DBusInterface {
     public static interface PropertyCurrentBandsType extends TypeRef<List<UInt32>> {
 
     }
+
 }

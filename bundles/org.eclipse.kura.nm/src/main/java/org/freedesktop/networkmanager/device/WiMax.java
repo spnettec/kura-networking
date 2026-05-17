@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,6 @@
 package org.freedesktop.networkmanager.device;
 
 import java.util.List;
-import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -24,7 +22,6 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
@@ -40,24 +37,9 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "ActiveNsp", type = DBusPath.class, access = Access.READ)
 public interface WiMax extends DBusInterface {
 
-    public List<DBusPath> GetNspList();
+    List<DBusPath> GetNspList();
 
     public static interface PropertyNspsType extends TypeRef<List<DBusPath>> {
-
-    }
-
-    public static class PropertiesChanged extends DBusSignal {
-
-        private final Map<String, Variant<?>> properties;
-
-        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _properties);
-            this.properties = _properties;
-        }
-
-        public Map<String, Variant<?>> getProperties() {
-            return this.properties;
-        }
 
     }
 
@@ -65,13 +47,12 @@ public interface WiMax extends DBusInterface {
 
         private final DBusPath nsp;
 
-        public NspAdded(String _path, DBusPath _nsp) throws DBusException {
-            super(_path, _nsp);
-            this.nsp = _nsp;
+        public NspAdded(String path, DBusPath nsp) throws DBusException {
+                super(path, nsp);        this.nsp = nsp;
         }
 
         public DBusPath getNsp() {
-            return this.nsp;
+            return nsp;
         }
 
     }
@@ -80,14 +61,14 @@ public interface WiMax extends DBusInterface {
 
         private final DBusPath nsp;
 
-        public NspRemoved(String _path, DBusPath _nsp) throws DBusException {
-            super(_path, _nsp);
-            this.nsp = _nsp;
+        public NspRemoved(String path, DBusPath nsp) throws DBusException {
+                super(path, nsp);        this.nsp = nsp;
         }
 
         public DBusPath getNsp() {
-            return this.nsp;
+            return nsp;
         }
 
     }
+
 }

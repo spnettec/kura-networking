@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.networkmanager.vpn;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
@@ -31,35 +30,34 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "State", type = UInt32.class, access = Access.READ)
 public interface Plugin extends DBusInterface {
 
-    public void Connect(Map<String, Map<String, Variant<?>>> connection);
+    void Connect(Map<String, Map<String, Variant<?>>> connection);
 
-    public void ConnectInteractive(Map<String, Map<String, Variant<?>>> connection, Map<String, Variant<?>> details);
+    void ConnectInteractive(Map<String, Map<String, Variant<?>>> connection, Map<String, Variant<?>> details);
 
-    public String NeedSecrets(Map<String, Map<String, Variant<?>>> settings);
+    String NeedSecrets(Map<String, Map<String, Variant<?>>> settings);
 
-    public void Disconnect();
+    void Disconnect();
 
-    public void SetConfig(Map<String, Variant<?>> config);
+    void SetConfig(Map<String, Variant<?>> config);
 
-    public void SetIp4Config(Map<String, Variant<?>> config);
+    void SetIp4Config(Map<String, Variant<?>> config);
 
-    public void SetIp6Config(Map<String, Variant<?>> config);
+    void SetIp6Config(Map<String, Variant<?>> config);
 
-    public void SetFailure(String reason);
+    void SetFailure(String reason);
 
-    public void NewSecrets(Map<String, Map<String, Variant<?>>> connection);
+    void NewSecrets(Map<String, Map<String, Variant<?>>> connection);
 
     public static class StateChanged extends DBusSignal {
 
         private final UInt32 state;
 
-        public StateChanged(String _path, UInt32 _state) throws DBusException {
-            super(_path, _state);
-            this.state = _state;
+        public StateChanged(String path, UInt32 state) throws DBusException {
+                super(path, state);        this.state = state;
         }
 
         public UInt32 getState() {
-            return this.state;
+            return state;
         }
 
     }
@@ -69,18 +67,17 @@ public interface Plugin extends DBusInterface {
         private final String message;
         private final List<String> secrets;
 
-        public SecretsRequired(String _path, String _message, List<String> _secrets) throws DBusException {
-            super(_path, _message, _secrets);
-            this.message = _message;
-            this.secrets = _secrets;
+        public SecretsRequired(String path, String message, List<String> secrets) throws DBusException {
+                super(path, message, secrets);        this.message = message;
+                this.secrets = secrets;
         }
 
         public String getMessage() {
-            return this.message;
+            return message;
         }
 
         public List<String> getSecrets() {
-            return this.secrets;
+            return secrets;
         }
 
     }
@@ -89,13 +86,12 @@ public interface Plugin extends DBusInterface {
 
         private final Map<String, Variant<?>> config;
 
-        public Config(String _path, Map<String, Variant<?>> _config) throws DBusException {
-            super(_path, _config);
-            this.config = _config;
+        public Config(String path, Map<String, Variant<?>> config) throws DBusException {
+                super(path, config);        this.config = config;
         }
 
         public Map<String, Variant<?>> getConfig() {
-            return this.config;
+            return config;
         }
 
     }
@@ -104,13 +100,12 @@ public interface Plugin extends DBusInterface {
 
         private final Map<String, Variant<?>> ip4config;
 
-        public Ip4Config(String _path, Map<String, Variant<?>> _ip4config) throws DBusException {
-            super(_path, _ip4config);
-            this.ip4config = _ip4config;
+        public Ip4Config(String path, Map<String, Variant<?>> ip4config) throws DBusException {
+                super(path, ip4config);        this.ip4config = ip4config;
         }
 
         public Map<String, Variant<?>> getIp4config() {
-            return this.ip4config;
+            return ip4config;
         }
 
     }
@@ -119,13 +114,12 @@ public interface Plugin extends DBusInterface {
 
         private final Map<String, Variant<?>> ip6config;
 
-        public Ip6Config(String _path, Map<String, Variant<?>> _ip6config) throws DBusException {
-            super(_path, _ip6config);
-            this.ip6config = _ip6config;
+        public Ip6Config(String path, Map<String, Variant<?>> ip6config) throws DBusException {
+                super(path, ip6config);        this.ip6config = ip6config;
         }
 
         public Map<String, Variant<?>> getIp6config() {
-            return this.ip6config;
+            return ip6config;
         }
 
     }
@@ -134,13 +128,12 @@ public interface Plugin extends DBusInterface {
 
         private final String banner;
 
-        public LoginBanner(String _path, String _banner) throws DBusException {
-            super(_path, _banner);
-            this.banner = _banner;
+        public LoginBanner(String path, String banner) throws DBusException {
+                super(path, banner);        this.banner = banner;
         }
 
         public String getBanner() {
-            return this.banner;
+            return banner;
         }
 
     }
@@ -149,14 +142,14 @@ public interface Plugin extends DBusInterface {
 
         private final UInt32 reason;
 
-        public Failure(String _path, UInt32 _reason) throws DBusException {
-            super(_path, _reason);
-            this.reason = _reason;
+        public Failure(String path, UInt32 reason) throws DBusException {
+                super(path, reason);        this.reason = reason;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
 
     }
+
 }

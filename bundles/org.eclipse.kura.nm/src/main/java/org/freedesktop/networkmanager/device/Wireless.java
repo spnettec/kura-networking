@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.networkmanager.device;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -40,28 +39,13 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "LastScan", type = Long.class, access = Access.READ)
 public interface Wireless extends DBusInterface {
 
-    public List<DBusPath> GetAccessPoints();
+    List<DBusPath> GetAccessPoints();
 
-    public List<DBusPath> GetAllAccessPoints();
+    List<DBusPath> GetAllAccessPoints();
 
-    public void RequestScan(Map<String, Variant<?>> options);
+    void RequestScan(Map<String, Variant<?>> options);
 
     public static interface PropertyAccessPointsType extends TypeRef<List<DBusPath>> {
-
-    }
-
-    public static class PropertiesChanged extends DBusSignal {
-
-        private final Map<String, Variant<?>> properties;
-
-        public PropertiesChanged(String _path, Map<String, Variant<?>> _properties) throws DBusException {
-            super(_path, _properties);
-            this.properties = _properties;
-        }
-
-        public Map<String, Variant<?>> getProperties() {
-            return this.properties;
-        }
 
     }
 
@@ -69,13 +53,12 @@ public interface Wireless extends DBusInterface {
 
         private final DBusPath accessPoint;
 
-        public AccessPointAdded(String _path, DBusPath _accessPoint) throws DBusException {
-            super(_path, _accessPoint);
-            this.accessPoint = _accessPoint;
+        public AccessPointAdded(String path, DBusPath accessPoint) throws DBusException {
+                super(path, accessPoint);        this.accessPoint = accessPoint;
         }
 
         public DBusPath getAccessPoint() {
-            return this.accessPoint;
+            return accessPoint;
         }
 
     }
@@ -84,14 +67,14 @@ public interface Wireless extends DBusInterface {
 
         private final DBusPath accessPoint;
 
-        public AccessPointRemoved(String _path, DBusPath _accessPoint) throws DBusException {
-            super(_path, _accessPoint);
-            this.accessPoint = _accessPoint;
+        public AccessPointRemoved(String path, DBusPath accessPoint) throws DBusException {
+                super(path, accessPoint);        this.accessPoint = accessPoint;
         }
 
         public DBusPath getAccessPoint() {
-            return this.accessPoint;
+            return accessPoint;
         }
 
     }
+
 }

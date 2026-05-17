@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,42 +12,37 @@
  *******************************************************************************/
 package org.freedesktop.networkmanager;
 
-import java.util.Map;
-
-import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.Tuple;
 import org.freedesktop.dbus.annotations.Position;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
-public class AddConnection2Tuple extends Tuple {
-
+public class AddConnection2Tuple<A, B> extends Tuple {
     @Position(0)
-    private DBusPath path;
+    private A path;
     @Position(1)
-    private Map<String, Variant<?>> result;
+    private B result;
 
-    public AddConnection2Tuple(DBusPath path, Map<String, Variant<?>> result) {
+    public AddConnection2Tuple(A path, B result) {
         this.path = path;
         this.result = result;
     }
 
-    public void setPath(DBusPath arg) {
-        this.path = arg;
+    public void setPath(A arg) {
+        path = arg;
     }
 
-    public DBusPath getPath() {
-        return this.path;
+    public A getPath() {
+        return path;
     }
 
-    public void setResult(Map<String, Variant<?>> arg) {
-        this.result = arg;
+    public void setResult(B arg) {
+        result = arg;
     }
 
-    public Map<String, Variant<?>> getResult() {
-        return this.result;
+    public B getResult() {
+        return result;
     }
 
 }

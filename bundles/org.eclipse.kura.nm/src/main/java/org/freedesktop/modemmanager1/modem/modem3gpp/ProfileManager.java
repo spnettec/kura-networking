@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,12 @@ package org.freedesktop.modemmanager1.modem.modem3gpp;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
+import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.Variant;
 
 /**
@@ -28,10 +29,18 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "IndexField", type = String.class, access = Access.READ)
 public interface ProfileManager extends DBusInterface {
 
-    public List<Map<String, Variant<?>>> List();
+    List<Map<String, Variant<?>>> List();
 
-    public Map<String, Variant<?>> Set(Map<String, Variant<?>> requestedProperties);
+    Map<String, Variant<?>> Set(Map<String, Variant<?>> requestedProperties);
 
-    public void Delete(Map<String, Variant<?>> properties);
+    void Delete(Map<String, Variant<?>> properties);
+
+    public static class Updated extends DBusSignal {
+
+        public Updated(String path) throws DBusException {
+                super(path);
+        }
+
+    }
 
 }
