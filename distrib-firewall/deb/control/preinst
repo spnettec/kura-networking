@@ -11,6 +11,41 @@
 
 XML_HEADER='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 SNAPSHOT_0_PATH='/opt/eclipse/kura/user/snapshots/snapshot_0.xml'
+INSTALL_LOG='/var/log/kura-install.log'
+CONFLICTING_PKG='kura-networking'
+
+log_install_event() {
+    local ts
+    ts="$(date -Is 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+    mkdir -p "$(dirname "$INSTALL_LOG")"
+    echo "${ts} [kura-firewall-only preinst] $1" | tee -a "$INSTALL_LOG"
+}
+
+detect_companion_swap() {
+    # Case A: companion still in 'installed' state (defensive — apt's Conflicts resolver
+    # normally removes it before our preinst runs, so we won't usually see this).
+    if command -v dpkg-query >/dev/null 2>&1 \
+       && [ "$(dpkg-query -W -f='${Status}' "$CONFLICTING_PKG" 2>/dev/null)" = "install ok installed" ]; then
+        log_install_event "detected installed ${CONFLICTING_PKG}; apt Conflicts will remove it."
+        return
+    fi
+    # Case B: companion was removed earlier in this same apt transaction (Conflicts swap).
+    # dpkg.log is written in real time, so the 'remove' line is visible here. Use a tight
+    # 30s window — in a Conflicts swap the remove and the new preinst happen within
+    # the same second; anything older is almost certainly a separate manual action.
+    if [ -r /var/log/dpkg.log ]; then
+        local cutoff
+        cutoff="$(date -d '30 seconds ago' '+%Y-%m-%d %H:%M:%S' 2>/dev/null)"
+        if [ -n "$cutoff" ] && awk -v cut="$cutoff" -v pkg="$CONFLICTING_PKG" '
+             $1" "$2 >= cut && $3=="remove" && $4 ~ "^"pkg":" { found=1; exit }
+             END { exit !found }
+           ' /var/log/dpkg.log; then
+            log_install_event "${CONFLICTING_PKG} was removed seconds ago — apt Conflicts swap."
+        fi
+    fi
+}
+
+detect_companion_swap
 
 echo ""
 echo "Checking Kura snapshot_0.xml..."
