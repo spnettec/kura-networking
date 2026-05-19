@@ -70,10 +70,38 @@ fi
 disable_placeholder_rules_file /etc/sysconfig/iptables
 disable_placeholder_rules_file /etc/sysconfig/ip6tables
 
-if [ -f /opt/eclipse/kura/user/snapshots/snapshot_0.xml ]; then
-    python3 /opt/eclipse/kura/kura-firewall-install/customize_firewall_snapshot.py \
-        /opt/eclipse/kura/user/snapshots/snapshot_0.xml
-fi
+customize_snapshots() {
+    # Kura loads the snapshot with the *largest numeric suffix* at startup, not
+    # snapshot_0.xml. Editing only snapshot_0.xml is silently ignored on any
+    # device that has accumulated timestamped snapshots from prior runs. So
+    # patch BOTH: snapshot_0.xml (the baseline / restore target) AND the latest
+    # timestamped snapshot (what's actually loaded next boot).
+    # The python script is idempotent — it skips if FirewallConfigurationService
+    # is already present in the file.
+    local snapshots_dir=/opt/eclipse/kura/user/snapshots
+    local script=/opt/eclipse/kura/kura-firewall-install/customize_firewall_snapshot.py
+
+    if [ ! -d "$snapshots_dir" ] || [ ! -f "$script" ]; then
+        return
+    fi
+
+    if [ -f "$snapshots_dir/snapshot_0.xml" ]; then
+        python3 "$script" "$snapshots_dir/snapshot_0.xml"
+    fi
+
+    # Find the snapshot with the largest numeric suffix (excluding snapshot_0).
+    local latest
+    latest="$(find "$snapshots_dir" -maxdepth 1 -name 'snapshot_*.xml' -printf '%f\n' 2>/dev/null \
+              | awk -F'snapshot_|\\.xml' '$2 ~ /^[0-9]+$/ && $2 != "0" {print $2}' \
+              | sort -n \
+              | tail -1)"
+
+    if [ -n "$latest" ] && [ -f "$snapshots_dir/snapshot_${latest}.xml" ]; then
+        python3 "$script" "$snapshots_dir/snapshot_${latest}.xml"
+    fi
+}
+
+customize_snapshots
 
 set_kura_property kura.have.firewall.admin true
 
