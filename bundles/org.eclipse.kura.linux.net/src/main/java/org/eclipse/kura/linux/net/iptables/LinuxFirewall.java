@@ -14,11 +14,14 @@ package org.eclipse.kura.linux.net.iptables;
 
 import java.io.File;
 import java.net.UnknownHostException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.NetworkPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +58,32 @@ public class LinuxFirewall extends AbstractLinuxFirewall {
             File cfgFile = new File(this.iptables.getFirewallConfigFileName());
             if (!cfgFile.exists()) {
                 IptablesConfig minimalConfig = new IptablesConfig(executorService);
+                seedSafetyRules(minimalConfig);
                 minimalConfig.applyRules();
             }
             initialize();
         } catch (KuraException e) {
             logger.error("failed to initialize LinuxFirewall", e);
+        }
+    }
+
+    // First boot has no /etc/sysconfig/iptables, so applyRules() runs against
+    // an empty config: INPUT DROP + empty input-kura → SSH + Web are dead until
+    // FirewallConfigurationService.activate() pushes the snapshot's open ports.
+    // If snapshot loading is broken (corrupt file, missing entry, encrypt
+    // mismatch), the gateway is wedged. Seed 22 + 443 here so there is always
+    // a way back in. Metatype default (DFLT_IPV4_OPEN_PORTS_VALUE) handles the
+    // ConfigAdmin path; this handles the kernel path.
+    private void seedSafetyRules(IptablesConfig minimalConfig) {
+        try {
+            Set<LocalRule> seed = new LinkedHashSet<>();
+            NetworkPair<IPAddress> anywhere = new NetworkPair<>(IP4Address.getDefaultAddress(), (short) 0);
+            seed.add(new LocalRule(22, "tcp", anywhere, null, null, null, null));
+            seed.add(new LocalRule(443, "tcp", anywhere, null, null, null, null));
+            minimalConfig.setLocalRules(seed);
+            logger.info("Seeded minimal iptables config with SSH (22) + HTTPS (443) safety rules");
+        } catch (UnknownHostException e) {
+            logger.warn("Failed to seed safety rules; first-boot INPUT chain will be deny-all", e);
         }
     }
 

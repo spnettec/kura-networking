@@ -16,6 +16,7 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -48,8 +49,28 @@ public class FirewallConfigurationServiceImpl extends
 
     private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
 
+    // IPv4-only safety default — applied when firewall.open.ports is absent
+    // from ConfigAdmin (fresh activate, snapshot corruption). Kept private to
+    // this bundle: it is a firewall-sibling policy decision, not API surface.
+    // IPv6 deliberately keeps the empty default (no policy to expose v6).
+    private static final String DFLT_IPV4_OPEN_PORTS_VALUE = "22,tcp,,,,,,#;443,tcp,,,,,,#;";
+
     @Override
     protected FirewallConfiguration buildFirewallConfigurationFromProperties(Map<String, Object> properties) {
+        // OSGi DS does not auto-inject Metatype Tad defaults into the activate
+        // properties — Tad.setDefault only seeds the UI form. Without this
+        // override, a fresh activate (no ConfigAdmin entry yet) parses an
+        // absent firewall.open.ports as "deny all", which on first boot
+        // wedges SSH + HTTPS. Distinguish absent (apply IPv4 safety default)
+        // from explicitly empty (operator wants closed) so the lockdown use
+        // case is still reachable.
+        if (!properties.containsKey(FirewallConfiguration.OPEN_PORTS_PROP_NAME)) {
+            Map<String, Object> withDefault = new HashMap<>(properties);
+            withDefault.put(FirewallConfiguration.OPEN_PORTS_PROP_NAME, DFLT_IPV4_OPEN_PORTS_VALUE);
+            logger.info("firewall.open.ports absent from configuration; applying IPv4 safety default: {}",
+                    DFLT_IPV4_OPEN_PORTS_VALUE);
+            return new FirewallConfiguration(withDefault);
+        }
         return new FirewallConfiguration(properties);
     }
 
@@ -108,7 +129,7 @@ public class FirewallConfigurationServiceImpl extends
         tad.setType(Tscalar.STRING);
         tad.setCardinality(0);
         tad.setRequired(true);
-        tad.setDefault(FirewallConfiguration.DFLT_OPEN_PORTS_VALUE);
+        tad.setDefault(DFLT_IPV4_OPEN_PORTS_VALUE);
         tad.setDescription(
                 NetworkConfigurationMessages.getMessage(NetworkConfigurationPropertyNames.FIREWALL_OPEN_PORTS));
         tocd.addAD(tad);
