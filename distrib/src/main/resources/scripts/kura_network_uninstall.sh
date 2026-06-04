@@ -19,6 +19,19 @@ KURA_SYMLINK=$3
 # shellcheck source=/dev/null
 source "${BASE_DIR}/${KURA_SYMLINK}/.data/install_network_config.sh"
 
+# Remove this sibling from the kura-core install-order registry, identically to
+# every other sibling. Only invoked on a real removal (STATUS=remove).
+deregister_sibling() {
+    SIBLING_NAME="networking"
+    REGISTRY="${BASE_DIR}/${KURA_SYMLINK}/framework/sibling-install-order"
+    if [ -f "${REGISTRY}" ]; then
+        echo "  Removing ${SIBLING_NAME} from sibling-install-order"
+        TMP=$(mktemp 2>/dev/null || echo "${REGISTRY}.tmp.$$")
+        grep -vFx "${SIBLING_NAME}" "${REGISTRY}" > "${TMP}" 2>/dev/null || true
+        mv -f "${TMP}" "${REGISTRY}" 2>/dev/null || rm -f "${TMP}"
+    fi
+}
+
 restore_backup_files() {
     SUFFIX="${1}"
 
@@ -199,6 +212,7 @@ kura_uninstall() {
 
         recover_web_ui_kura_properties
         remove_kura_networking_service
+        deregister_sibling
     fi
 
     # flush all cached filesystem to disk

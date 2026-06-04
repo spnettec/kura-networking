@@ -105,6 +105,31 @@ customize_snapshots
 
 set_kura_property kura.have.firewall.admin true
 
+# Register this sibling in the kura-core install-order registry, identically to
+# every other sibling. kura-firewall-only installs under siblings/firewall/, so
+# it registers the name "firewall" (the mutually-exclusive kura-networking
+# registers "networking"). Idempotent.
+register_sibling() {
+    local sibling_name="firewall"
+    local registry=/opt/eclipse/kura/framework/sibling-install-order
+    if [ -f "$registry" ]; then
+        if ! grep -qFx "$sibling_name" "$registry"; then
+            echo "  Registering $sibling_name in sibling-install-order"
+            echo "$sibling_name" >> "$registry"
+        else
+            echo "  $sibling_name already registered in sibling-install-order"
+        fi
+    else
+        echo "  Creating sibling-install-order registry"
+        mkdir -p /opt/eclipse/kura/framework 2>/dev/null || true
+        echo "$sibling_name" > "$registry"
+        chown kurad:kurad "$registry" 2>/dev/null || true
+        chmod 664 "$registry" 2>/dev/null || true
+    fi
+}
+
+register_sibling
+
 if command -v systemctl > /dev/null 2>&1; then
     systemctl daemon-reload > /dev/null 2>&1 || true
     systemctl disable firewall > /dev/null 2>&1 || true

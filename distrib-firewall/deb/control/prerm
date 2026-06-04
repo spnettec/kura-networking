@@ -66,3 +66,19 @@ fi
 flush_kernel_iptables
 
 set_kura_property kura.have.firewall.admin false
+
+# De-register from the kura-core install-order registry, identically to every
+# other sibling. (postinst re-registers on a subsequent upgrade's configure.)
+deregister_sibling() {
+    local sibling_name="firewall"
+    local registry=/opt/eclipse/kura/framework/sibling-install-order
+    if [ -f "$registry" ]; then
+        echo "  Removing $sibling_name from sibling-install-order"
+        local tmp
+        tmp=$(mktemp 2>/dev/null || echo "$registry.tmp.$$")
+        grep -vFx "$sibling_name" "$registry" > "$tmp" 2>/dev/null || true
+        mv -f "$tmp" "$registry" 2>/dev/null || rm -f "$tmp"
+    fi
+}
+
+deregister_sibling

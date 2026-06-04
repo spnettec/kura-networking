@@ -25,6 +25,29 @@ error_state() {
     exit 1
 }
 
+# Register this sibling in the kura-core install-order registry, identically to
+# every other sibling (wires, opcua, ...). Idempotent. kura-networking installs
+# under siblings/networking/, so it registers the name "networking" (the
+# mutually-exclusive kura-firewall-only registers "firewall").
+register_sibling() {
+    SIBLING_NAME="networking"
+    REGISTRY="${BASE_DIR}/${KURA_SYMLINK}/framework/sibling-install-order"
+    if [ -f "${REGISTRY}" ]; then
+        if ! grep -qFx "${SIBLING_NAME}" "${REGISTRY}"; then
+            echo "  Registering ${SIBLING_NAME} in sibling-install-order"
+            echo "${SIBLING_NAME}" >> "${REGISTRY}"
+        else
+            echo "  ${SIBLING_NAME} already registered in sibling-install-order"
+        fi
+    else
+        echo "  Creating sibling-install-order registry"
+        mkdir -p "${BASE_DIR}/${KURA_SYMLINK}/framework" 2>/dev/null || true
+        echo "${SIBLING_NAME}" > "${REGISTRY}"
+        chown kurad:kurad "${REGISTRY}" 2>/dev/null || true
+        chmod 664 "${REGISTRY}" 2>/dev/null || true
+    fi
+}
+
 systemctl_if_present() {
     ACTION="$1"
     SERVICE="$2"
@@ -314,6 +337,8 @@ if (! java -version > /dev/null 2>&1) || (! keytool > /dev/null 2>&1); then
         error_state "Java binary cannot be found."
     fi
 fi
+
+register_sibling
 
 run_kura_network_install
 
