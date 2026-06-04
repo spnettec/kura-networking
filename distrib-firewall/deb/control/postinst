@@ -50,10 +50,16 @@ disable_placeholder_rules_file() {
 set_kura_property() {
     local key="$1"
     local value="$2"
-    local properties_file=/opt/eclipse/kura/framework/kura.properties
+    # Write to kura_custom.properties (under user/) rather than kura.properties
+    # (under framework/). kura_custom.properties overrides kura.properties and
+    # is preserved across kura-core upgrades because user/ is part of the
+    # upgrade save/restore cycle.
+    local properties_file=/opt/eclipse/kura/user/kura_custom.properties
 
+    # Ensure the file exists.
     if [ ! -f "$properties_file" ]; then
-        return
+        mkdir -p "$(dirname "$properties_file")" 2>/dev/null || true
+        touch "$properties_file"
     fi
 
     if grep -q "^#*${key}=" "$properties_file"; then

@@ -114,7 +114,7 @@ remove_dnsmasq_leases() {
 }
 
 recover_web_ui_kura_properties() {
-    if [ -f "${BASE_DIR}/${KURA_SYMLINK}/framework/kura.properties" ]; then
+    if [ -d "${BASE_DIR}/${KURA_SYMLINK}/user" ]; then
         set_kura_property "kura.have.net.admin" "false"
         set_kura_property "kura.have.firewall.admin" "false"
     fi
@@ -123,7 +123,17 @@ recover_web_ui_kura_properties() {
 set_kura_property() {
     KEY="$1"
     VALUE="$2"
-    PROPERTIES_FILE="${BASE_DIR}/${KURA_SYMLINK}/framework/kura.properties"
+    # Write to kura_custom.properties (under user/) rather than kura.properties
+    # (under framework/). kura_custom.properties overrides kura.properties and
+    # is preserved across kura-core upgrades because user/ is part of the
+    # upgrade save/restore cycle.
+    PROPERTIES_FILE="${BASE_DIR}/${KURA_SYMLINK}/user/kura_custom.properties"
+
+    # Ensure the file exists.
+    if [ ! -f "${PROPERTIES_FILE}" ]; then
+        mkdir -p "$(dirname "${PROPERTIES_FILE}")"
+        touch "${PROPERTIES_FILE}"
+    fi
 
     if grep -q "^#*${KEY}=" "${PROPERTIES_FILE}"; then
         sed -i "s|^#*${KEY}=.*|${KEY}=${VALUE}|" "${PROPERTIES_FILE}"
