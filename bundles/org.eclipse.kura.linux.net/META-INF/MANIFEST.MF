@@ -56,4 +56,3 @@ Export-Package: org.eclipse.kura.internal.board;version="1.0.0";x-internal:=true
  org.eclipse.kura.linux.net.route;version="1.0.1";uses:="org.eclipse.kura.net,org.eclipse.kura.net.route",
  org.eclipse.kura.linux.net.util;version="1.1.0";uses:="org.eclipse.kura.net.wifi,org.eclipse.kura.net",
  org.eclipse.kura.linux.net.wifi;version="1.1.0";uses:="org.eclipse.kura.net.wifi"
-Bundle-RequiredExecutionEnvironment: JavaSE-21
