@@ -75,3 +75,4 @@ Bundle-ClassPath: .,
  lib/jnr-unixsocket.jar,
  lib/jnr-x86asm.jar
 Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-21

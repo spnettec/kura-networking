@@ -22,3 +22,4 @@ Import-Package: jakarta.annotation.security;version="2.1.1",
  org.osgi.service.useradmin;version="1.1.0",
  org.slf4j;version="[1.7,3)"
 Export-Package: org.eclipse.kura.network.status.provider.api;version="1.0.0";x-internal:=true
+Bundle-RequiredExecutionEnvironment: JavaSE-21
