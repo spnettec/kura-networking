@@ -63,15 +63,15 @@ Import-Package: jakarta.xml.bind;version="4.0.0",
  org.slf4j;version="[1.7,3)"
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
- lib/dbus-java-core.jar,
- lib/dbus-java-transport-jnr-unixsocket.jar,
- lib/jffi.jar,
- lib/jffi-native.jar,
- lib/jnr-a64asm.jar,
- lib/jnr-constants.jar,
- lib/jnr-enxio.jar,
- lib/jnr-ffi.jar,
- lib/jnr-posix.jar,
- lib/jnr-unixsocket.jar,
- lib/jnr-x86asm.jar
+ dbus-java-core.jar,
+ dbus-java-transport-jnr-unixsocket.jar,
+ jffi.jar,
+ jffi-native.jar,
+ jnr-a64asm.jar,
+ jnr-constants.jar,
+ jnr-enxio.jar,
+ jnr-ffi.jar,
+ jnr-posix.jar,
+ jnr-unixsocket.jar,
+ jnr-x86asm.jar
 Bundle-ActivationPolicy: lazy
