@@ -332,6 +332,7 @@ public abstract class AbstractLinuxFirewall {
         deleteAllLocalRules();
         deleteAllPortForwardRules();
         deleteAllAutoNatRules();
+        deleteAllNatRules();
         update();
     }
 
