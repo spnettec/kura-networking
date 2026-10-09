@@ -24,7 +24,7 @@ import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceStateLock {
+public class DeviceStateLock implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceStateLock.class);
 
@@ -32,6 +32,7 @@ public class DeviceStateLock {
     private final NMDeviceStateChangeHandler stateHandler;
     private final DBusConnection dbusConnection;
     private final int timeout;
+    private boolean closed;
 
     public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, List<NMDeviceState> expectedNmDeviceStates,
             int timeout) throws DBusException {
@@ -55,7 +56,15 @@ public class DeviceStateLock {
             logger.warn("Wait interrupted because of:", e);
             Thread.currentThread().interrupt();
         } finally {
+            close();
+        }
+    }
+
+    @Override
+    public void close() throws DBusException {
+        if (!this.closed) {
             this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.stateHandler);
+            this.closed = true;
         }
     }
 

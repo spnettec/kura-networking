@@ -596,7 +596,7 @@ public class NMDbusConnector {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
                 connection, deviceId, interfaceName, deviceType, this.networkManager.getVersion());
 
-        DeviceStateLock dsLock = null;
+        boolean updateExistingConnection = false;
 
         if (connection.isPresent()) {
             Connection availableConnection = connection.get();
@@ -604,39 +604,40 @@ public class NMDbusConnector {
             String availableConnectionId = (String) availableConnectionSettings.get("connection").get("id").getValue();
             String expectedConnectionName = String.format("kura-%s-connection", interfaceName);
             if (availableConnectionId.equals(expectedConnectionName)) {
-                dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                        Arrays.asList(NMDeviceState.NM_DEVICE_STATE_CONFIG), this.timeout);
-                availableConnection.Update(newConnectionSettings);
+                updateExistingConnection = true;
             } else {
                 newConnectionSettings = NMSettingsConverter.buildSettings(properties, Optional.empty(), deviceId,
                         interfaceName, deviceType, this.networkManager.getVersion());
             }
         }
-        if (dsLock == null) {
-            dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                    Arrays.asList(NMDeviceState.NM_DEVICE_STATE_CONFIG), this.timeout);
-            Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
-            DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
-            Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                    createdConnectionPath.getPath(), Connection.class);
-            connection = Optional.of(createdConnection);
-        }
-
-        try {
-            this.networkManager.activateConnection(connection.get(), device);
-            dsLock.waitForSignal();
-        } catch (DBusExecutionException e) {
-            if (e.getMessage().contains("because device has no carrier")) {
-                try {
-                    this.disconnect(Optional.of(device), deviceId);
-                } catch (Exception e1) {
-                    logger.error("error deactive connection", e1);
-                }
-                logger.warn("Couldn't complete activation of {} interface, caused by:{}", deviceId, e.getMessage());
+        try (DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                Arrays.asList(NMDeviceState.NM_DEVICE_STATE_CONFIG), this.timeout)) {
+            if (updateExistingConnection) {
+                connection.get().Update(newConnectionSettings);
             } else {
+                Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
+                DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
+                Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
+                        createdConnectionPath.getPath(), Connection.class);
+                connection = Optional.of(createdConnection);
+            }
+
+            try {
+                this.networkManager.activateConnection(connection.get(), device);
+                dsLock.waitForSignal();
+            } catch (DBusExecutionException e) {
+                if (e.getMessage().contains("because device has no carrier")) {
+                    try {
+                        this.disconnect(Optional.of(device), deviceId);
+                    } catch (Exception e1) {
+                        logger.error("error deactive connection", e1);
+                    }
+                    logger.warn("Couldn't complete activation of {} interface, caused by:{}", deviceId, e.getMessage());
+                } else {
+                    logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
+                }
                 logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
             }
-            logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
         }
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
@@ -672,10 +673,11 @@ public class NMDbusConnector {
             if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(createdDevice))) {
                 this.networkManager.setDeviceManaged(createdDevice, true);
             }
-            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, createdDevice.getObjectPath(),
-                    Arrays.asList(NMDeviceState.NM_DEVICE_STATE_ACTIVATED), this.timeout);
-            this.networkManager.activateConnection(createdConnection, createdDevice);
-            dsLock.waitForSignal();
+            try (DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, createdDevice.getObjectPath(),
+                    Arrays.asList(NMDeviceState.NM_DEVICE_STATE_ACTIVATED), this.timeout)) {
+                this.networkManager.activateConnection(createdConnection, createdDevice);
+                dsLock.waitForSignal();
+            }
         } catch (DBusExecutionException | DBusException | TimeoutException e) {
             logger.warn("Couldn't complete creation of device {}, caused by:", deviceId, e);
         }
@@ -737,10 +739,11 @@ public class NMDbusConnector {
         Device device = optDevice.get();
         NMDeviceState deviceState = this.networkManager.getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
-            DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                    Arrays.asList(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED), this.timeout);
-            device.Disconnect();
-            dsLock.waitForSignal();
+            try (DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
+                    Arrays.asList(NMDeviceState.NM_DEVICE_STATE_DISCONNECTED), this.timeout)) {
+                device.Disconnect();
+                dsLock.waitForSignal();
+            }
         }
     }
 

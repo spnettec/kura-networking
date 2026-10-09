@@ -666,6 +666,52 @@ public class NMDbusConnectorTest {
     }
 
     @Test
+    public void virtualActivationFailureShouldReleaseStateWaiter() throws DBusException, IOException, TimeoutException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice(
+                "eth0",
+                "eth0",
+                NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED,
+                false,
+                false,
+                false);
+        givenMockedDeviceList();
+
+        givenMockedDeviceOnDeviceCreationLock(
+                "myVlan",
+                "myVlan",
+                NMDeviceType.NM_DEVICE_TYPE_VLAN,
+                NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true,
+                false,
+                false);
+        givenMockToPrepNetworkManagerToAllowDeviceToCreateNewConnection();
+
+        givenNetworkConfigMapWith("net.interfaces", "eth0,myVlan");
+        givenNetworkConfigMapWith("net.interface.myVlan.type", "VLAN");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.dnsServers", "1.1.1.1");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.ip4.gateway", "192.168.0.1");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.parent", "eth0");
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.id", 55);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.flags", 2);
+        givenNetworkConfigMapWith("net.interface.myVlan.config.vlan.egress", "2:3");
+
+        givenNMActivationFailed();
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+
+        thenAddConnectionIsCalledFor("myVlan");
+        thenActivateConnectionIsCalledFor("myVlan");
+        thenNoDeviceStateWaitersRemain();
+    }
+
+    @Test
     public void applyShouldWorkWithExistingVlan() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenMockedDevice(
@@ -1599,6 +1645,64 @@ public class NMDbusConnectorTest {
         thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
+    private void givenConfiguredEthernetForFailure() throws Exception {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_ACTIVATED, true, false, false);
+        givenMockedDeviceList();
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", true);
+    }
+
+    private void thenNoDeviceStateWaitersRemain() {
+        assertEquals(0, this.signalHandlers.getOrDefault(Device.StateChanged.class, List.of()).stream()
+                .filter(org.eclipse.kura.nm.signal.handlers.NMDeviceStateChangeHandler.class::isInstance).count());
+    }
+
+    @Test
+    public void updateFailureShouldReleaseStateWaiter() throws Exception {
+        givenConfiguredEthernetForFailure();
+        doThrow(new DBusExecutionException("update rejected")).when(this.mockConnection).Update(any());
+        whenApplyIsCalledWith(this.netConfig);
+        verify(this.mockConnection).Update(any());
+        thenNoDeviceStateWaitersRemain();
+    }
+
+    @Test
+    public void activationFailureShouldReleaseStateWaiter() throws Exception {
+        givenConfiguredEthernetForFailure();
+        givenNMActivationFailed();
+        whenApplyIsCalledWith(this.netConfig);
+        thenActivateConnectionIsCalledFor("eth0");
+        thenNoDeviceStateWaitersRemain();
+    }
+
+    @Test
+    public void disconnectFailureShouldReleaseStateWaiter() throws Exception {
+        givenConfiguredEthernetForFailure();
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusDisabled");
+        doThrow(new DBusExecutionException("disconnect rejected")).when(this.mockDevices.get("eth0")).Disconnect();
+        whenApplyIsCalledWith(this.netConfig);
+        thenDisconnectIsCalledFor("eth0");
+        thenNoDeviceStateWaitersRemain();
+    }
+
+    @Test
+    public void addConnectionFailureShouldReleaseStateWaiter() throws Exception {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("eth0", "eth0", NMDeviceType.NM_DEVICE_TYPE_ETHERNET,
+                NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, false, false, false);
+        givenMockedDeviceList();
+        givenNetworkConfigMapWith("net.interfaces", "eth0");
+        givenNetworkConfigMapWith("net.interface.eth0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.eth0.config.dhcpClient4.enabled", true);
+        doThrow(new DBusExecutionException("add rejected")).when(this.mockedNetworkManagerSettings).AddConnection(any());
+        whenApplyIsCalledWith(this.netConfig);
+        verify(this.mockedNetworkManagerSettings).AddConnection(any());
+        thenNoDeviceStateWaitersRemain();
+    }
+
     /*
      * Given
      */
@@ -1638,8 +1742,8 @@ public class NMDbusConnectorTest {
             return null;
         }).when(this.dbusConnection).addSigHandler(any(Class.class), any(DBusSigHandler.class));
         doAnswer(invocation -> {
-            this.signalHandlers.getOrDefault(invocation.getArgument(0), Collections.emptyList())
-                    .remove(invocation.getArgument(1));
+            assertTrue(this.signalHandlers.getOrDefault(invocation.getArgument(0), Collections.emptyList())
+                    .remove(invocation.getArgument(1)), "Signal handler must be registered and removed only once");
             return null;
         }).when(this.dbusConnection).removeSigHandler(any(Class.class), any(DBusSigHandler.class));
         when(this.mockedNetworkManager.ActivateConnection(any(), any(), any())).thenAnswer(invocation -> {
