@@ -6,7 +6,7 @@
 	signal: -32.00 dBm
 	last seen: 0 ms ago
 	SSID: @SSID@
-	Supported rates: 1.0* 2.0* 5.5* 11.0* 
+	Supported rates: 1.0* 2.0* 5.5* 11.0*
 	DS Parameter set: channel 11
 	Supported operating classes:
 		 * current operating class: 4
@@ -14,7 +14,7 @@
 		 * operating class: 84
 		 * operating class: 129
 	ERP: <no flags>
-	Extended supported rates: 6.0 9.0 12.0 18.0 24.0 36.0 48.0 54.0 
+	Extended supported rates: 6.0 9.0 12.0 18.0 24.0 36.0 48.0 54.0
 	RSN:	 * Version: 1
 		 * Group cipher: CCMP
 		 * Pairwise ciphers: CCMP

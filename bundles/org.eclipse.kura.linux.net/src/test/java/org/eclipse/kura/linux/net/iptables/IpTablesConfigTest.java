@@ -785,7 +785,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
 
         // Create a temporary file for the test
         File tempFile = Files.createTempFile(directory, "test-iptables", ".tmp").toFile();
-        
+
 
         // Test that restore method executes and triggers error logging
         IptablesConfig iptablesConfig = new IsolatedIptablesConfig(executorServiceMock);
