@@ -1,0 +1,36 @@
+/*******************************************************************************
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
+package org.eclipse.kura.linux.net.iptables;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.net.UnknownHostException;
+import org.eclipse.kura.KuraException;
+import org.junit.jupiter.api.Test;
+
+public class FilterForwardChainRuleTest {
+
+    @Test
+    public void stringToFilterForwardRuleTest() throws KuraException, NumberFormatException, UnknownHostException {
+        FilterForwardChainRule forwardRule = new FilterForwardChainRule(
+                "-A forward-kura -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT");
+
+        assertEquals(32, forwardRule.getDstMask());
+        assertEquals("172.16.0.1", forwardRule.getDstNetwork());
+        assertEquals("eth0", forwardRule.getInputInterface());
+        assertEquals("eth1", forwardRule.getOutputInterface());
+        assertEquals("tcp", forwardRule.getProtocol());
+        assertEquals(32, forwardRule.getSrcMask());
+        assertEquals("172.16.0.100", forwardRule.getSrcNetwork());
+    }
+}

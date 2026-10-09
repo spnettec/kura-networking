@@ -1,0 +1,244 @@
+/*******************************************************************************
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
+package org.eclipse.kura.linux.net.util;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.Test;
+
+@Timeout(10)
+public class LinuxNetworkUtilTest {
+    @TempDir
+    Path directory;
+
+    private LinuxNetworkUtil linuxNetworkUtil;
+    private String interfaceName;
+    private String dedicatedInterfaceName;
+    private CommandExecutorServiceStub commandExecutorServiceStub;
+    private String macAddress;
+    private String linkStatus;
+    private boolean toolExists;
+    private boolean systemdUnitExists;
+    private Optional<String> toolPath;
+
+    @Test
+    public void createApNetworkInterface() {
+        givenLinuxNetworkUtil();
+        givenInterfaceName("testInterface");
+
+        whenDedicatedInterfaceName("testInterface_ap");
+
+        thenApNetworkInterfaceIsCreated();
+    }
+
+    @Test
+    public void setNetworkInterfaceMacAddress() {
+        givenLinuxNetworkUtil();
+        givenMacAddress("12:34:56:78:ab:cd");
+
+        whenDedicatedInterfaceName("testInterface_ap");
+
+        thenNetworkInterfaceMacAddressIsSet();
+    }
+
+    @Test
+    public void setNetworkInterfaceLinkUp() {
+        givenLinuxNetworkUtil();
+        givenLinkStatus("up");
+
+        whenDedicatedInterfaceName("testInterface_ap");
+
+        thenNetworkInterfaceLinkIsUP();
+    }
+
+    @Test
+    public void setNetworkInterfaceLinkDown() {
+        givenLinuxNetworkUtil();
+        givenLinkStatus("down");
+
+        whenDedicatedInterfaceName("testInterface_ap");
+
+        thenNetworkInterfaceLinkIsDown();
+    }
+
+    @Test
+    public void shouldCheckToolExistence() throws IOException {
+        givenLinuxNetworkUtil();
+        givenTool(directory.resolve("dhcpd").toString());
+
+        whenCheckTool("dhcpd", directory.toString() + "/");
+
+        thenToolExists();
+    }
+
+    @Test
+    public void shouldCheckSystemdUnitExistence() throws IOException {
+        givenLinuxNetworkUtil();
+        givenSystemctl(0);
+
+        whenCheckSystemdUnit("dnsmask.service", directory.toString() + "/");
+
+        thenSystemdUnitExists();
+    }
+
+    @Test
+    public void shouldNotCheckSystemdUnitExistence() throws IOException {
+        givenLinuxNetworkUtil();
+        givenSystemctl(4);
+
+        whenCheckSystemdUnit("dnsmask.service", directory.toString() + "/");
+
+        thenSystemdUnitNotExist();
+    }
+
+    @Test
+    public void shouldNotCheckSystemdUnitExistenceIfSystemctlNotExist() {
+        givenLinuxNetworkUtil();
+
+        whenCheckSystemdUnit("dnsmask.service", directory.toString() + "/");
+
+        thenSystemdUnitNotExist();
+    }
+
+    @Test
+    public void shouldGetToolPath() throws IOException {
+        givenLinuxNetworkUtil();
+        givenTool(directory.resolve("myAwesomeCommand").toString());
+
+        whenGetTool("myAwesomeCommand", directory.toString() + "/");
+
+        thenToolIsRetrieved(directory.resolve("myAwesomeCommand").toString());
+    }
+
+    private void givenLinuxNetworkUtil() {
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        this.commandExecutorServiceStub = new CommandExecutorServiceStub(status);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorServiceStub);
+    }
+
+    private void givenTool(String tool) throws IOException {
+        Files.createFile(Paths.get(tool));
+    }
+
+    private void givenSystemctl(int exitCode) throws IOException {
+        // The production path owns a ProcessBuilder; use only our own harmless executable.
+        Path script = directory.resolve("systemctl");
+        Files.writeString(script, "#!/bin/sh\nexit " + exitCode + "\n");
+        assertTrue(script.toFile().setExecutable(true, true));
+    }
+
+    private void givenInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
+    }
+
+    private void givenMacAddress(String macAddress) {
+        this.macAddress = macAddress;
+    }
+
+    private void givenLinkStatus(String linkStatus) {
+        this.linkStatus = linkStatus;
+    }
+
+    private void whenDedicatedInterfaceName(String dedicatedInterfaceName) {
+        this.dedicatedInterfaceName = dedicatedInterfaceName;
+    }
+
+    private void whenCheckTool(String toolName, String searchPath) {
+        this.toolExists = LinuxNetworkUtil.toolExists(toolName, new String[] {searchPath});
+    }
+
+    private void whenCheckSystemdUnit(String unitName, String searchPath) {
+        this.systemdUnitExists = LinuxNetworkUtil.systemdSystemUnitExists(unitName, new String[] {searchPath});
+    }
+
+    private void whenGetTool(String tool, String searchPath) {
+        this.toolPath = LinuxNetworkUtil.getToolPath(tool, new String[] {searchPath});
+    }
+
+    private void thenApNetworkInterfaceIsCreated() {
+        try {
+            this.linuxNetworkUtil.createApNetworkInterface(this.interfaceName, this.dedicatedInterfaceName);
+            assertArrayEquals(
+                    LinuxNetworkUtil.formIwDevIfaceInterfaceAddAp(this.interfaceName, this.dedicatedInterfaceName),
+                    this.commandExecutorServiceStub.getLastCommand());
+        } catch (KuraException e) {
+            fail();
+        }
+    }
+
+    private void thenNetworkInterfaceMacAddressIsSet() {
+        try {
+            this.linuxNetworkUtil.setNetworkInterfaceMacAddress(this.dedicatedInterfaceName);
+            assertArrayEquals(
+                    LinuxNetworkUtil.formIpLinkSetAddress(this.dedicatedInterfaceName, this.macAddress),
+                    this.commandExecutorServiceStub.getLastCommand());
+        } catch (KuraException e) {
+            fail();
+        }
+    }
+
+    private void thenNetworkInterfaceLinkIsUP() {
+        try {
+            this.linuxNetworkUtil.setNetworkInterfaceLinkUp(this.dedicatedInterfaceName);
+            assertArrayEquals(
+                    LinuxNetworkUtil.formIpLinkSetStatus(this.dedicatedInterfaceName, this.linkStatus),
+                    this.commandExecutorServiceStub.getLastCommand());
+        } catch (KuraException e) {
+            fail();
+        }
+    }
+
+    private void thenNetworkInterfaceLinkIsDown() {
+        try {
+            this.linuxNetworkUtil.setNetworkInterfaceLinkDown(this.dedicatedInterfaceName);
+            assertArrayEquals(
+                    LinuxNetworkUtil.formIpLinkSetStatus(this.dedicatedInterfaceName, this.linkStatus),
+                    this.commandExecutorServiceStub.getLastCommand());
+        } catch (KuraException e) {
+            fail();
+        }
+    }
+
+    private void thenToolExists() {
+        assertTrue(this.toolExists);
+    }
+
+    private void thenSystemdUnitExists() {
+        assertTrue(this.systemdUnitExists);
+    }
+
+    private void thenSystemdUnitNotExist() {
+        assertFalse(this.systemdUnitExists);
+    }
+
+    private void thenToolIsRetrieved(String expectedToolPath) {
+        assertTrue(this.toolPath.isPresent());
+        assertEquals(expectedToolPath, this.toolPath.get());
+    }
+}
