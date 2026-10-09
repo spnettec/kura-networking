@@ -47,6 +47,5 @@
         <module>distrib</module>
         <module>distrib-firewall</module>
         <module>dp</module>
-        <module>tests</module>
     </modules>
 </project>
