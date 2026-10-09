@@ -351,7 +351,7 @@ public class IptablesConfig extends IptablesConfigConstants {
             if (path == null) {
                 path = getFirewallConfigFileName();
             }
-            status = execute("iptables-save > " + path);
+            status = execute(getIptablesCommand() + "-save > " + path);
             if (!status.getExitStatus().isSuccessful()) {
                 logger.error("Failed to save rules in {}", path);
             }
@@ -385,7 +385,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     public void restore(String filename) {
         try {
             if (this.executorService != null) {
-                CommandStatus status = execute("iptables-restore " + filename);
+                CommandStatus status = execute(getIptablesCommand() + "-restore " + filename);
                 if (!status.getExitStatus().isSuccessful()) {
                     logger.error("Failed to restore rules from {}", filename);
                 }
