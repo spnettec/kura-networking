@@ -64,6 +64,7 @@ public class NetworkConfigurationRestServiceTest {
 
     public NetworkConfigurationRestServiceTest() {
         var endpoint = new NetworkConfigurationRestService();
+        this.endpoint = endpoint;
         endpoint.setConfigurationService(this.configurationService);
         endpoint.setCryptoService(Mockito.mock(CryptoService.class));
         this.proxy = new JaxRsRequestHandlerProxy(endpoint);
@@ -284,16 +285,22 @@ public class NetworkConfigurationRestServiceTest {
      * Utils
      */
 
+    protected NetworkConfigurationRestService endpoint;
     private JaxRsRequestHandlerProxy proxy;
     private KuraMessage response;
 
-    private record MethodSpec(String method, String... aliases) { }
+    protected record MethodSpec(String method, String... aliases) { }
 
     private void whenRequestIsPerformed(MethodSpec method, String path) {
         whenRequestIsPerformed(method, path, null);
     }
 
     private void whenRequestIsPerformed(MethodSpec method, String path, String body) {
+        this.response = performRequest(method, path, body);
+    }
+
+    /** Allows transport tests to retain all component setup and response assertions. */
+    protected KuraMessage performRequest(MethodSpec method, String path, String body) {
         var payload = new KuraPayload();
         if (body != null) {
             payload.setBody(body.getBytes(StandardCharsets.UTF_8));
@@ -303,7 +310,7 @@ public class NetworkConfigurationRestServiceTest {
                 RequestHandlerMessageConstants.ARGS_KEY.value(),
                 Arrays.asList(path.substring(1).split("/")));
         try {
-            this.response = switch (method.method()) {
+            return switch (method.method()) {
             case "GET" -> this.proxy.doGet(null, request);
             case "POST" -> this.proxy.doPost(null, request);
             case "PUT" -> this.proxy.doPut(null, request);
@@ -311,7 +318,7 @@ public class NetworkConfigurationRestServiceTest {
             default -> throw new AssertionError(method);
             };
         } catch (KuraException e) {
-            this.response = DefaultExceptionHandler.toKuraMessage(
+            return DefaultExceptionHandler.toKuraMessage(
                     DefaultExceptionHandler.toWebApplicationException(e),
                     Optional.empty());
         } catch (Exception e) {
