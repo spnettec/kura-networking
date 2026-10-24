@@ -37,7 +37,7 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
     private final String hardwareRevision;
     private final String primaryPort;
     private final Map<String, ModemPortType> ports;
-    private final Set<ModemCapability> supportedModemCapabilities;
+    private final List<Set<ModemCapability>> supportedModemCapabilities;
     private final Set<ModemCapability> currentModemCapabilities;
     private final ModemPowerState powerState;
     private final Set<ModemModePairDTO> supportedModes;
@@ -66,7 +66,7 @@ public class ModemInterfaceStatusDTO extends NetworkInterfaceStatusDTO {
         this.hardwareRevision = status.getHardwareRevision();
         this.primaryPort = status.getPrimaryPort();
         this.ports = status.getPorts();
-        this.supportedModemCapabilities = status.getSupportedModemCapabilities();
+        this.supportedModemCapabilities = status.getAllSupportedModemCapabilities();
         this.currentModemCapabilities = status.getCurrentModemCapabilities();
         this.powerState = status.getPowerState();
         this.supportedModes = status.getSupportedModes().stream().map(ModemModePairDTO::new)
