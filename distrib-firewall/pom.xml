@@ -10,22 +10,16 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura-networking.parent</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../bundles/pom.xml</relativePath>
     </parent>
-
     <artifactId>kura-firewall-only.distrib</artifactId>
     <packaging>pom</packaging>
-
     <dependencies>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -48,23 +42,19 @@
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
     <properties>
         <addon.5s.installation.dir>/opt/eclipse/kura/siblings/firewall/5s</addon.5s.installation.dir>
         <addon.4s.installation.dir>/opt/eclipse/kura/siblings/firewall/4s</addon.4s.installation.dir>
         <addon.4.installation.dir>/opt/eclipse/kura/siblings/firewall/4</addon.4.installation.dir>
-
         <org.eclipse.kura.linux.net.name>org.eclipse.kura.linux.net</org.eclipse.kura.linux.net.name>
         <org.eclipse.kura.net.admin.firewall.name>org.eclipse.kura.net.admin.firewall</org.eclipse.kura.net.admin.firewall.name>
         <org.eclipse.kura.core.net.name>org.eclipse.kura.core.net</org.eclipse.kura.core.net.name>
         <org.eclipse.kura.net.configuration.name>org.eclipse.kura.net.configuration</org.eclipse.kura.net.configuration.name>
-
         <deb.architecture>all</deb.architecture>
         <package.name>kura-firewall-only</package.name>
         <summary>Eclipse Kura Firewall add-on</summary>
         <long.description>The Kura Firewall add-on provides firewall management without taking over host network configuration.</long.description>
     </properties>
-
     <profiles>
         <profile>
             <id>debugBuild</id>
@@ -93,7 +83,6 @@
             </properties>
         </profile>
     </profiles>
-
     <build>
         <plugins>
             <plugin>
@@ -110,7 +99,7 @@
                             <name>release.version</name>
                             <value>${project.version}</value>
                             <regex>-SNAPSHOT</regex>
-                            <replacement></replacement>
+                            <replacement />
                             <failIfNoMatch>false</failIfNoMatch>
                         </configuration>
                     </execution>
@@ -262,3 +251,4 @@
         </plugins>
     </build>
 </project>
+
