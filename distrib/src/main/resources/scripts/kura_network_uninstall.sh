@@ -114,6 +114,12 @@ remove_dnsmasq_leases() {
 }
 
 recover_web_ui_kura_properties() {
+    # During a full Kura removal the core package will retain user/ for a later
+    # reinstall. Do not rewrite the user's settings before the core saves them.
+    if dpkg --get-selections kura-core 2>/dev/null | awk '$2 == "deinstall" || $2 == "purge" { found = 1 } END { exit !found }'; then
+        echo "Kura core is being removed; preserving its user configuration."
+        return
+    fi
     if [ -d "${BASE_DIR}/${KURA_SYMLINK}/user" ]; then
         set_kura_property "kura.have.net.admin" "false"
         set_kura_property "kura.have.firewall.admin" "false"
